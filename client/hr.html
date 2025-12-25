@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerSync - HR Mic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0d1629 100%);
+            color: #e0e6ff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #64b5f6;
+            opacity: 0.6;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .microphone-circle {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .microphone-circle:hover {
+            transform: scale(1.05);
+        }
+
+        .mic-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #64b5f6;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(100, 181, 246, 0.6), inset 0 0 20px rgba(100, 181, 246, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(100, 181, 246, 0.8), inset 0 0 30px rgba(100, 181, 246, 0.2);
+            }
+        }
+
+        .mic-icon {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 16px;
+            color: #81c784;
+            margin-top: 40px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #ff6b6b;
+            font-size: 16px;
+            margin-top: 30px;
+        }
+
+        .recording-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: recordingPulse 0.8s infinite;
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="starContainer"></div>
+
+    <div class="container">
+        <div class="microphone-circle" onclick="toggleRecording()">
+            <div class="mic-ring"></div>
+            <div class="mic-icon">🎤</div>
+        </div>
+
+        <div class="recording-indicator" id="recordingStatus" style="display: none;">
+            <div class="recording-dot"></div>
+            <span>Recording...</span>
+        </div>
+
+        <div class="status-text" id="statusText">Click the microphone to record</div>
+    </div>
+
+    <script>
+        let recordingActive = false;
+
+        // Create stars
+        function createStars() {
+            const container = document.getElementById('starContainer');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        function toggleRecording() {
+            if (!recordingActive) {
+                recordingActive = true;
+                document.getElementById('recordingStatus').style.display = 'flex';
+                document.getElementById('statusText').textContent = 'Recording... Speak now!';
+                
+                setTimeout(() => {
+                    recordingActive = false;
+                    document.getElementById('recordingStatus').style.display = 'none';
+                    document.getElementById('statusText').textContent = '✓ Recording saved! Click to record again.';
+                }, 5000);
+            }
+        }
+
+        // Initialize
+        createStars();
+    </script>
+</body>
+</html>

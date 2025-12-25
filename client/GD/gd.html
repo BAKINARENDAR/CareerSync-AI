@@ -1,11 +1,80 @@
-<html>
-    <head>
-        <link rel="stylesheet" href="gd.css">
-        <script src="gd.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CareerSync AI | Group Discussion</title>
+  <link rel="stylesheet" href="gd.css" />
+</head>
+<body>
 
-    </head>
-    <body>
-        <H>GRETYUH
-        </H>
-    </body>
-</html>SSS
+<div class="container">
+  <div class="card">
+
+    <h1>Group Discussion</h1>
+    <p class="subtitle">AI-based GD Practice Module</p>
+
+    <!-- Topic -->
+    <div class="field">
+      <label>Choose Topic</label>
+      <select id="topicSelect">
+        <option>Impact of AI on Employment</option>
+        <option>Work From Home – Pros & Cons</option>
+        <option>Social Media: Boon or Bane</option>
+        <option>Technology in Education</option>
+      </select>
+    </div>
+
+    <!-- Members -->
+    <div class="field">
+      <label>Number of Participants</label>
+      <select id="memberSelect">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4" selected>4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+    <!-- Speaker Name -->
+    <div class="field">
+      <label>Speaker Name</label>
+      <input type="text" id="speakerInput" placeholder="Enter your name" />
+    </div>
+
+    <!-- Topic Display -->
+    <div class="topic-box">
+      <span>Current Topic</span>
+      <p id="currentTopic">Impact of AI on Employment</p>
+    </div>
+
+    <!-- Mic -->
+    <div class="mic">🎤</div>
+
+    <h3 id="speaker">Speaker: —</h3>
+
+    <!-- Timer -->
+    <div class="timer" id="timer">60</div>
+
+    <!-- Controls -->
+    <div class="buttons">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="nextBtn" disabled>Next</button>
+    </div>
+
+    <!-- Status -->
+    <p class="status" id="status">Waiting to start...</p>
+
+    <!-- Insights -->
+    <div class="insights">
+      <h4>AI Insights</h4>
+      <p id="participation">Participation: 0 turns</p>
+      <p id="leadership">Leadership Indicator: No</p>
+    </div>
+
+  </div>
+</div>
+
+<script src="gd.js"></script>
+</body>
+</html>

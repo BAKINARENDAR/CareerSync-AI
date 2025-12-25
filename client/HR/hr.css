@@ -134,3 +134,12 @@ body {
         opacity: 0.4;
     }
 }
+.timer-display {
+    display: none !important;
+    color: #ff9800 !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+    margin: 15px 0 !important;
+    text-align: center !important;
+    text-shadow: 0 0 10px #ff9800 !important;
+}

@@ -6,24 +6,59 @@
     <title>CareerSync - HR Mic</title>
     <link rel="stylesheet" href="hr.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="hr.js"></script>
+    <style>
+        #timerDisplay {
+            display: none !important;
+            color: #ff9800 !important;
+            font-size: 28px !important;
+            font-weight: bold !important;
+            margin: 15px 0 !important;
+            text-align: center !important;
+            text-shadow: 0 0 10px #ff9800 !important;
+            z-index: 1000 !important;
+        }
+        
+        .status-text {
+            z-index: 1;
+        }
+        
+    </style>
+    <script defer src="hr.js"></script>
 </head>
 <body>
     <div class="stars" id="starContainer"></div>
 
     <div class="container">
         <h3>Human Resources</h3><br><br>
+
         <div class="microphone-circle" onclick="toggleRecording()">
             <div class="mic-ring"></div>
             <div class="mic-icon"><i class="fas fa-microphone"></i></div>
         </div>
-
+        
         <div class="recording-indicator" id="recordingStatus" style="display: none;">
             <div class="recording-dot"></div>
             <span>Recording...</span>
         </div>
 
-        <div class="status-text" id="statusText">Click the microphone to record</div>
+        <div id="timerDisplay">5:00</div>
+
+        <div class="status-text" id="statusText">Click the microphone to start speaking (5 mins max)</div>
+
+        <div id="questionBox" style="margin-top: 30px; color:#e0e6ff;">
+            <h4>Current Question:</h4>
+            <p id="currentQuestion">Tell me about yourself.</p>
+        </div>
+
+        <div id="transcriptBox" style="margin-top: 20px; text-align:left; max-width:600px; margin-inline:auto;">
+            <h4>Recognized Answer:</h4>
+            <div id="transcriptText" style="margin-top:8px; padding:12px; border-radius:8px; background:rgba(10,14,39,0.8); border:1px solid #64b5f6; min-height:60px;"></div>
+        </div>
+
+        <div id="summaryMetricsBox" style="margin-top: 20px; display:none; text-align:left; max-width:600px; margin-inline:auto;">
+            <h4>Summary:</h4>
+            <p id="summaryMetrics" style="margin-top:8px; color:#b0bec5;"></p>
+        </div>
     </div>
 </body>
 </html>

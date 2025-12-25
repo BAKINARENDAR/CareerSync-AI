@@ -59,6 +59,7 @@ body {
 
 .microphone-circle:hover {
     transform: scale(1.05);
+    color: #64b5f6;
 }
 
 .mic-ring {

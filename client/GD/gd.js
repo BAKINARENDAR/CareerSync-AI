@@ -1,67 +1,61 @@
 let participants = [];
 let currentIndex = 0;
 let timeLeft = 60;
-let timer;
+let timerInterval;
 
 let participationCount = {};
 let leader = "";
 
-const topicSelect = document.getElementById("topicSelect");
-const currentTopic = document.getElementById("currentTopic");
-const memberSelect = document.getElementById("memberSelect");
-const speakerInput = document.getElementById("speakerInput");
-
 const speakerEl = document.getElementById("speaker");
 const timerEl = document.getElementById("timer");
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const nextBtn = document.getElementById("nextBtn");
 const statusEl = document.getElementById("status");
+
+const topicSelect = document.getElementById("topicSelect");
+const topicText = document.getElementById("topicText");
+const memberSelect = document.getElementById("memberSelect");
+const speakerNameInput = document.getElementById("speakerName");
 
 const participationEl = document.getElementById("participation");
 const leadershipEl = document.getElementById("leadership");
 
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const nextBtn = document.getElementById("nextBtn");
-
 topicSelect.onchange = () => {
-  currentTopic.innerText = topicSelect.value;
+  topicText.innerText = topicSelect.value;
 };
 
 function generateParticipants(count) {
   participants = [];
   participationCount = {};
   for (let i = 1; i <= count; i++) {
-    let name = "Participant " + i;
+    const name = "Participant " + i;
     participants.push(name);
     participationCount[name] = 0;
   }
 }
 
 function startTimer() {
-  statusEl.innerText = "Speaking...";
   startBtn.disabled = true;
   stopBtn.disabled = false;
   nextBtn.disabled = true;
+  statusEl.innerText = "Speaking...";
 
-  timer = setInterval(() => {
+  timerInterval = setInterval(() => {
     timeLeft--;
     timerEl.innerText = timeLeft;
 
-    if (timeLeft === 0) stopSpeaking();
+    if (timeLeft === 0) {
+      stopSpeaking();
+    }
   }, 1000);
 }
 
 function stopSpeaking() {
-  clearInterval(timer);
+  clearInterval(timerInterval);
   stopBtn.disabled = true;
   nextBtn.disabled = false;
   statusEl.innerText = "Stopped";
-}
-
-function updateInsights(name) {
-  participationEl.innerText =
-    "Participation: " + participationCount[name] + " turn(s)";
-  leadershipEl.innerText =
-    name === leader ? "Leadership Indicator: Yes" : "Leadership Indicator: No";
 }
 
 startBtn.onclick = () => {
@@ -71,41 +65,49 @@ startBtn.onclick = () => {
 
   generateParticipants(parseInt(memberSelect.value));
 
-  let name = speakerInput.value || participants[currentIndex];
+  let name = speakerNameInput.value || participants[currentIndex];
   participants[currentIndex] = name;
-  leader = name;
 
-  participationCount[name]++;
   speakerEl.innerText = "Speaker: " + name;
-  updateInsights(name);
+  participationCount[name]++;
 
+  if (currentIndex === 0) {
+    leader = name;
+  }
+
+  updateInsights(name);
   startTimer();
 };
-
-stopBtn.onclick = stopSpeaking;
 
 nextBtn.onclick = () => {
   currentIndex++;
 
   if (currentIndex < participants.length) {
-    let name = speakerInput.value || participants[currentIndex];
+    let name = speakerNameInput.value || participants[currentIndex];
     participants[currentIndex] = name;
 
-    participationCount[name]++;
     speakerEl.innerText = "Speaker: " + name;
+    participationCount[name]++;
+
     updateInsights(name);
 
     timeLeft = 60;
     timerEl.innerText = timeLeft;
     startBtn.disabled = false;
     nextBtn.disabled = true;
-    statusEl.innerText = "Ready for next participant";
+    statusEl.innerText = "Next participant ready";
   } else {
     speakerEl.innerText = "Group Discussion Completed";
     timerEl.innerText = "--";
-    statusEl.innerText = "GD session finished";
     startBtn.disabled = true;
     stopBtn.disabled = true;
     nextBtn.disabled = true;
+    statusEl.innerText = "GD session finished";
   }
 };
+
+function updateInsights(name) {
+  participationEl.innerText = `Participation: ${participationCount[name]} turn(s)`;
+  leadershipEl.innerText =
+    name === leader ? "Leadership Indicator: Yes" : "Leadership Indicator: No";
+}

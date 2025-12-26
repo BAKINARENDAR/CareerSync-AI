@@ -1,68 +1,47 @@
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
 }
 
 body {
   margin: 0;
   background: radial-gradient(circle at top, #0f172a, #020617);
+  font-family: 'Segoe UI', sans-serif;
   color: #ffffff;
 }
 
-.container {
-  min-height: 100vh;
+.app {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
 }
 
 .card {
   width: 360px;
-  padding: 30px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.06);
   backdrop-filter: blur(18px);
-  box-shadow: 0 0 40px rgba(56, 189, 248, 0.25);
+  border-radius: 22px;
+  padding: 30px;
   text-align: center;
+  box-shadow: 0 0 45px rgba(56,189,248,0.2);
 }
 
-h1 {
+h2 {
   color: #7dd3fc;
   margin-bottom: 5px;
 }
 
-.subtitle {
+.sub {
   font-size: 14px;
   color: #94a3b8;
   margin-bottom: 20px;
 }
 
-.field {
-  text-align: left;
-  margin-bottom: 12px;
-}
-
-.field label {
-  font-size: 12px;
-  color: #38bdf8;
-}
-
-.field select,
-.field input {
-  width: 100%;
-  margin-top: 5px;
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
-  background: #020617;
-  color: white;
-}
-
 .topic-box {
-  margin: 18px 0;
-  padding: 12px;
   background: rgba(255,255,255,0.08);
+  padding: 12px;
   border-radius: 12px;
+  margin-bottom: 25px;
 }
 
 .topic-box span {
@@ -70,17 +49,24 @@ h1 {
   color: #38bdf8;
 }
 
-.mic {
-  width: 110px;
-  height: 110px;
-  margin: 15px auto;
+.topic-box p {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+.mic-circle {
+  width: 120px;
+  height: 120px;
+  margin: 20px auto;
   border-radius: 50%;
   border: 3px solid #38bdf8;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 42px;
-  box-shadow: 0 0 35px #38bdf8;
+}
+
+.glow {
   animation: pulse 2s infinite;
 }
 
@@ -91,35 +77,63 @@ h1 {
 }
 
 .timer {
-  font-size: 36px;
+  font-size: 38px;
   color: #facc15;
-  margin: 10px 0;
+  margin: 15px 0;
 }
 
-.buttons button {
+.actions button {
   width: 100%;
-  margin-top: 8px;
-  padding: 10px;
-  border-radius: 10px;
-  background: transparent;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 12px;
   border: 1px solid #38bdf8;
+  background: transparent;
   color: #7dd3fc;
   cursor: pointer;
+  font-size: 15px;
 }
 
-.buttons button:disabled {
+.actions button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
 .status {
+  margin-top: 15px;
   font-size: 13px;
   color: #22c55e;
-  margin-top: 10px;
+}
+.select-box {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.select-box label {
+  font-size: 12px;
+  color: #38bdf8;
+}
+
+.select-box select {
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #020617;
+  color: #ffffff;
+}
+.select-box input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #020617;
+  color: #ffffff;
 }
 
 .insights {
-  margin-top: 18px;
+  margin-top: 20px;
   padding: 12px;
   background: rgba(255,255,255,0.08);
   border-radius: 12px;
@@ -127,8 +141,8 @@ h1 {
 }
 
 .insights h4 {
-  color: #38bdf8;
   margin-bottom: 8px;
+  color: #38bdf8;
 }
 
 .insights p {

@@ -1,73 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Career Sync | Group Discussion</title>
-  <link rel="stylesheet" href="gd.css">
+  <meta charset="UTF-8" />
+  <title>Group Discussion Platform</title>
+  <link rel="stylesheet" href="gd.css" />
 </head>
 <body>
 
-<div class="app">
-  <div class="card">
+<div class="gd-card">
 
-    <h2>Group Discussion</h2>
-    <p class="sub">AI-based GD Evaluation Module</p>
+  <h2>Group Discussion</h2>
 
-    <!-- TOPIC -->
-    <div class="select-box">
-      <label>Choose Topic</label>
-      <select id="topicSelect">
-        <option>Impact of AI on Employment</option>
-        <option>Work From Home – Pros & Cons</option>
-        <option>Social Media: Boon or Bane</option>
-        <option>Technology in Education</option>
-      </select>
-    </div>
+  <input type="text" id="username" placeholder="Enter your name" />
 
-    <!-- PARTICIPANTS -->
-    <div class="select-box">
-      <label>Number of Participants</label>
-      <select id="memberSelect">
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4" selected>4</option>
-        <option value="5">5</option>
-      </select>
-    </div>
+  <p class="topic">
+    Topic: <span>Is Artificial Intelligence a threat or an opportunity?</span>
+  </p>
 
-    <!-- SPEAKER NAME -->
-    <div class="select-box">
-      <label>Speaker Name</label>
-      <input type="text" id="speakerName" placeholder="Enter participant name">
-    </div>
+  <div class="timer" id="timer">05:00</div>
 
-    <div class="topic-box">
-      <span>Current Topic</span>
-      <p id="topicText">Impact of AI on Employment</p>
-    </div>
+  <textarea id="response" placeholder="Your speech will appear here..." disabled></textarea>
 
-    <div class="mic-circle glow">🎤</div>
-
-    <h3 id="speaker">Speaker: —</h3>
-
-    <div class="timer" id="timer">60</div>
-
-    <div class="actions">
-      <button id="startBtn">Start</button>
-      <button id="stopBtn" disabled>Stop</button>
-      <button id="nextBtn" disabled>Next</button>
-    </div>
-
-    <p class="status" id="status">Waiting to start...</p>
-
-    <!-- INSIGHTS -->
-    <div class="insights">
-      <h4>AI Insights</h4>
-      <p id="participation">Participation: 0 turns</p>
-      <p id="leadership">Leadership Indicator: No</p>
-    </div>
-
+  <div class="actions">
+    <button onclick="joinGD()">Join GD</button>
+    <button onclick="startSpeaking()">Speak</button>
+    <button onclick="submitGD()">Submit</button>
   </div>
+
+  <div class="insights" id="insights"></div>
+
+  <p id="status"></p>
+
 </div>
 
 <script src="gd.js"></script>

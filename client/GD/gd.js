@@ -1,113 +1,86 @@
-let participants = [];
-let currentIndex = 0;
-let timeLeft = 60;
-let timerInterval;
+let time = 300;
+let interval;
+let recognition;
+let participants = {};
+let currentSpeaker = null;
 
-let participationCount = {};
-let leader = "";
+// Load topic
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("topicText").innerText =
+    localStorage.getItem("gdTopic");
+});
 
-const speakerEl = document.getElementById("speaker");
-const timerEl = document.getElementById("timer");
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const nextBtn = document.getElementById("nextBtn");
-const statusEl = document.getElementById("status");
-
-const topicSelect = document.getElementById("topicSelect");
-const topicText = document.getElementById("topicText");
-const memberSelect = document.getElementById("memberSelect");
-const speakerNameInput = document.getElementById("speakerName");
-
-const participationEl = document.getElementById("participation");
-const leadershipEl = document.getElementById("leadership");
-
-topicSelect.onchange = () => {
-  topicText.innerText = topicSelect.value;
-};
-
-function generateParticipants(count) {
-  participants = [];
-  participationCount = {};
-  for (let i = 1; i <= count; i++) {
-    const name = "Participant " + i;
-    participants.push(name);
-    participationCount[name] = 0;
+function joinGD() {
+  const name = document.getElementById("username").value;
+  if (!name) {
+    alert("Enter your name");
+    return;
   }
+
+  if (!participants[name]) {
+    participants[name] = { words: 0, turns: 0 };
+  }
+
+  document.getElementById("status").innerText =
+    `${name} joined the discussion`;
+}
+
+function startSpeaking() {
+  const name = document.getElementById("username").value;
+
+  if (currentSpeaker && currentSpeaker !== name) {
+    alert(`${currentSpeaker} is speaking. Please wait.`);
+    return;
+  }
+
+  currentSpeaker = name;
+  participants[name].turns++;
+
+  recognition = new (window.SpeechRecognition ||
+    window.webkitSpeechRecognition)();
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    document.getElementById("response").value += " " + text;
+    participants[name].words += text.split(" ").length;
+  };
+
+  recognition.start();
+}
+
+function submitGD() {
+  if (recognition) recognition.stop();
+  currentSpeaker = null;
 }
 
 function startTimer() {
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-  nextBtn.disabled = true;
-  statusEl.innerText = "Speaking...";
+  interval = setInterval(() => {
+    time--;
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+    document.getElementById("timer").innerText =
+      `${min}:${sec < 10 ? "0" : ""}${sec}`;
 
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    timerEl.innerText = timeLeft;
-
-    if (timeLeft === 0) {
-      stopSpeaking();
+    if (time === 0) {
+      clearInterval(interval);
+      generateInsights();
     }
   }, 1000);
 }
 
-function stopSpeaking() {
-  clearInterval(timerInterval);
-  stopBtn.disabled = true;
-  nextBtn.disabled = false;
-  statusEl.innerText = "Stopped";
-}
+function generateInsights() {
+  let result = "<b>GD Insights</b><br><br>";
+  let leader = "";
+  let maxWords = 0;
 
-startBtn.onclick = () => {
-  currentIndex = 0;
-  timeLeft = 60;
-  timerEl.innerText = timeLeft;
-
-  generateParticipants(parseInt(memberSelect.value));
-
-  let name = speakerNameInput.value || participants[currentIndex];
-  participants[currentIndex] = name;
-
-  speakerEl.innerText = "Speaker: " + name;
-  participationCount[name]++;
-
-  if (currentIndex === 0) {
-    leader = name;
+  for (let user in participants) {
+    result += `${user} → Words: ${participants[user].words}, Turns: ${participants[user].turns}<br>`;
+    if (participants[user].words > maxWords) {
+      maxWords = participants[user].words;
+      leader = user;
+    }
   }
 
-  updateInsights(name);
-  startTimer();
-};
-
-nextBtn.onclick = () => {
-  currentIndex++;
-
-  if (currentIndex < participants.length) {
-    let name = speakerNameInput.value || participants[currentIndex];
-    participants[currentIndex] = name;
-
-    speakerEl.innerText = "Speaker: " + name;
-    participationCount[name]++;
-
-    updateInsights(name);
-
-    timeLeft = 60;
-    timerEl.innerText = timeLeft;
-    startBtn.disabled = false;
-    nextBtn.disabled = true;
-    statusEl.innerText = "Next participant ready";
-  } else {
-    speakerEl.innerText = "Group Discussion Completed";
-    timerEl.innerText = "--";
-    startBtn.disabled = true;
-    stopBtn.disabled = true;
-    nextBtn.disabled = true;
-    statusEl.innerText = "GD session finished";
-  }
-};
-
-function updateInsights(name) {
-  participationEl.innerText = `Participation: ${participationCount[name]} turn(s)`;
-  leadershipEl.innerText =
-    name === leader ? "Leadership Indicator: Yes" : "Leadership Indicator: No";
+  result += `<br><b>Leader:</b> ${leader}`;
+  document.getElementById("insights").innerHTML = result;
 }

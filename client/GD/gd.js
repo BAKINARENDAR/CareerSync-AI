@@ -4,7 +4,7 @@ let current = 0;
 let time = 60;
 let timer;
 let recognition;
-let isSpeaking = false;
+let isSpeaking = true;
 
 
 function generateParticipants() {

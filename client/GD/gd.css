@@ -86,17 +86,3 @@ button {
   margin-top: 8px;
   font-size: 14px;
 }
-.mic-stop {
-  animation: fadeOut 0.5s forwards;
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0.4; transform: scale(0.9); }
-}
-
-.turn-ended {
-  color: #22c55e;
-  font-size: 14px;
-  margin-top: 8px;
-}

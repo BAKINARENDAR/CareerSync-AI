@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CareerSync AI | Technical Interview</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="technical.css">
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I
+  </div>
+</header>
+
+<section class="tech-container">
+
+  <!-- START BUTTON -->
+  <button class="start-btn" id="startBtn">
+    Start Technical Interview
+  </button>
+
+  <!-- INTERVIEW LAYOUT -->
+  <div class="interview-layout" id="interviewLayout">
+
+    <!-- INTERVIEWER CHAT (LEFT) -->
+    <div class="chat-column ai-column" id="aiChat"></div>
+
+    <!-- CENTER MIC + OPTIONS -->
+    <div class="center-column">
+
+      <div class="voice-circle" id="micBtn">
+        <i class="fa-solid fa-microphone mic-icon"></i>
+      </div>
+
+      <div class="options" id="options">
+        <button onclick="goCoding()">Coding Interview</button>
+        <button onclick="goConcepts()">Technical Concepts</button>
+      </div>
+
+    </div>
+
+    <!-- STUDENT CHAT (RIGHT) -->
+    <div class="chat-column user-column" id="userChat"></div>
+
+  </div>
+
+</section>
+
+<script src="technical.js"></script>
+</body>
+</html>

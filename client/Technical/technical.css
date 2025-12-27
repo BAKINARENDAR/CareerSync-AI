@@ -1,0 +1,149 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: #191b2a;
+  height: 100vh;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* HEADER */
+header {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.grad {
+  background: linear-gradient(90deg,#5ee7ff,#7bb7ff,#fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* CONTAINER */
+.tech-container {
+  width: 1200px;
+  text-align: center;
+}
+
+/* MIC */
+.voice-circle {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  border: 6px solid white;
+  box-shadow:
+    0 0 15px #ffffff,
+    0 0 30px #5ee7ff,
+    inset 0 0 20px #5ee7ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.mic-icon {
+  font-size: 70px;
+  color: #7ed9f8;
+}
+
+.mic-hint {
+  font-size: 12px;
+  color: #9aa4b2;
+  margin-top: 8px;
+}
+
+/* DISABLED MIC */
+.voice-circle.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ACTIVE MIC */
+.voice-circle.active {
+  cursor: pointer;
+  box-shadow:
+    0 0 30px #ffffff,
+    0 0 45px #5ee7ff,
+    inset 0 0 30px #5ee7ff;
+}
+
+/* START BUTTON */
+.start-btn {
+  padding: 14px 30px;
+  border-radius: 14px;
+  background: #263556;
+  border: 1px solid rgba(106,169,255,.4);
+  color: white;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+/* INTERVIEW GRID */
+.interview-layout {
+  display: none;
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: 1fr 320px 1fr;
+  gap: 20px;
+  height: 420px;
+}
+
+/* CHAT */
+.chat-column {
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-column { align-items: flex-start; }
+.user-column { align-items: flex-end; }
+
+.msg {
+  max-width: 85%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+
+.ai-msg {
+  background: #263556;
+  border: 1px solid rgba(94,231,255,.4);
+}
+
+.user-msg {
+  background: #1b233f;
+  border: 1px solid rgba(123,183,255,.4);
+}
+
+/* OPTIONS */
+.options {
+  display: none;
+  margin-top: 25px;
+}
+
+.options button {
+  width: 260px;
+  margin: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #263556;
+  border: 1px solid rgba(106,169,255,.4);
+  color: white;
+}

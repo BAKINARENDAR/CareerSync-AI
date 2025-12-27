@@ -1,9 +1,52 @@
-<html>
-    <head>
-        <link rel="stylesheet" href="gd.css">
-        <script src="gd.js"></script>
-    </head>
-    <body>
-        
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CareerSync AI - Group Discussion</title>
+  <link rel="stylesheet" href="gd.css">
+</head>
+<body>
+
+<div class="container">
+
+  <h1 class="title">Group Discussion</h1>
+  <p class="subtitle">AI-based GD Evaluation Module</p>
+
+  <label>Choose Topic</label>
+  <select id="topic">
+    <option>Impact of AI on Employment</option>
+    <option>Is Remote Work the Future?</option>
+    <option>Social Media – Boon or Bane</option>
+  </select>
+
+  <label>No. of Participants</label>
+  <input type="number" id="count" min="2" max="6" placeholder="Enter count">
+
+  <button onclick="generateParticipants()">Add Participants</button>
+
+  <div id="participants"></div>
+
+  <div class="current-topic">
+    <p>Current Topic</p>
+    <h3 id="currentTopic">—</h3>
+  </div>
+
+  <div class="mic-circle" id="mic">🎤</div>
+
+  <p class="speaker">Speaker: <span id="speaker">—</span></p>
+  <h1 class="timer" id="timer">60</h1>
+
+  <button class="start" onclick="startSpeaking()">Start Speaking</button>
+  <button class="stop" onclick="stopSpeaking()">Stop</button>
+
+  <h3>Live Transcript</h3>
+  <div class="transcript" id="transcript"></div>
+
+  <h3>Scores</h3>
+  <div id="scores"></div>
+
+</div>
+
+<script src="gd.js"></script>
+</body>
 </html>

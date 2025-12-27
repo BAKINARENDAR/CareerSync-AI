@@ -2,19 +2,14 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const Groq = require('groq-sdk');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
-
 app.use(cors());
 app.use(express.json());
-
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
 app.post('/api/analyze', async (req, res) => {
   try {
     const { text, confidence } = req.body;
-
     if (!text || !text.trim()) {
       return res.status(400).json({ 
         success: false, 

@@ -1,86 +1,96 @@
-let time = 300;
-let interval;
+let participants = [];
+let scores = {};
+let current = 0;
+let time = 60;
+let timer;
 let recognition;
-let participants = {};
-let currentSpeaker = null;
+let isSpeaking = false;
 
-// Load topic
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("topicText").innerText =
-    localStorage.getItem("gdTopic");
-});
 
-function joinGD() {
-  const name = document.getElementById("username").value;
-  if (!name) {
-    alert("Enter your name");
-    return;
+function generateParticipants() {
+  const count = document.getElementById("count").value;
+  const div = document.getElementById("participants");
+  div.innerHTML = "";
+  participants = [];
+  scores = {};
+
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement("input");
+    input.placeholder = `Participant ${i + 1} Name`;
+    input.onchange = () => {
+      participants[i] = input.value;
+      scores[input.value] = 0;
+    };
+    div.appendChild(input);
   }
-
-  if (!participants[name]) {
-    participants[name] = { words: 0, turns: 0 };
-  }
-
-  document.getElementById("status").innerText =
-    `${name} joined the discussion`;
 }
 
 function startSpeaking() {
-  const name = document.getElementById("username").value;
+  if (isSpeaking) return alert("Current speaker is still speaking!");
 
-  if (currentSpeaker && currentSpeaker !== name) {
-    alert(`${currentSpeaker} is speaking. Please wait.`);
-    return;
-  }
+  if (!participants.length)
+    return alert("Add participants first");
 
-  currentSpeaker = name;
-  participants[name].turns++;
+  const speaker = participants[current];
+  document.getElementById("speaker").innerText = speaker;
+  document.getElementById("currentTopic").innerText =
+    document.getElementById("topic").value;
 
-  recognition = new (window.SpeechRecognition ||
-    window.webkitSpeechRecognition)();
+  time = 60;
+  isSpeaking = true;
+  document.getElementById("timer").innerText = time;
 
-  recognition.onresult = (event) => {
-    const text = event.results[0][0].transcript;
-    document.getElementById("response").value += " " + text;
-    participants[name].words += text.split(" ").length;
+  const mic = document.getElementById("mic");
+  mic.classList.add("mic-active");
+  mic.classList.remove("mic-stop");
+
+  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.continuous = true;
+
+  recognition.onresult = (e) => {
+    const text = e.results[e.results.length - 1][0].transcript;
+    document.getElementById("transcript").innerText += " " + text;
+    scores[speaker] += 2; // speech contribution
+    updateScores();
   };
 
   recognition.start();
-}
 
-function submitGD() {
-  if (recognition) recognition.stop();
-  currentSpeaker = null;
-}
-
-function startTimer() {
-  interval = setInterval(() => {
+  timer = setInterval(() => {
     time--;
-    let min = Math.floor(time / 60);
-    let sec = time % 60;
-    document.getElementById("timer").innerText =
-      `${min}:${sec < 10 ? "0" : ""}${sec}`;
-
-    if (time === 0) {
-      clearInterval(interval);
-      generateInsights();
-    }
+    document.getElementById("timer").innerText = time;
+    scores[speaker] += 1; // time participation
+    if (time <= 0) stopSpeaking();
   }, 1000);
 }
 
-function generateInsights() {
-  let result = "<b>GD Insights</b><br><br>";
-  let leader = "";
-  let maxWords = 0;
+function stopSpeaking() {
+  if (!isSpeaking) return;
 
-  for (let user in participants) {
-    result += `${user} → Words: ${participants[user].words}, Turns: ${participants[user].turns}<br>`;
-    if (participants[user].words > maxWords) {
-      maxWords = participants[user].words;
-      leader = user;
-    }
-  }
+  clearInterval(timer);
+  if (recognition) recognition.stop();
 
-  result += `<br><b>Leader:</b> ${leader}`;
-  document.getElementById("insights").innerHTML = result;
+  const mic = document.getElementById("mic");
+  mic.classList.remove("mic-active");
+  mic.classList.add("mic-stop");
+
+  const speaker = participants[current];
+
+  // Show turn completion feedback
+  document.getElementById("transcript").innerHTML +=
+    `<p class="turn-ended">✔ ${speaker}'s turn completed</p>`;
+
+  isSpeaking = false;
+
+  // Move to next participant
+  current = (current + 1) % participants.length;
 }
+
+function updateScores() {
+  const div = document.getElementById("scores");
+  div.innerHTML = "";
+  for (let p in scores) {
+    div.innerHTML += `<p>${p}: ${scores[p]} pts</p>`;
+  }
+}
+

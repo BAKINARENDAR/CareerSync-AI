@@ -1,118 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #38bdf8;
+  --secondary: #0ea5e9;
+  --bg-dark: #020617;
+  --glass: rgba(15, 23, 42, 0.65);
+  --border-glass: rgba(255,255,255,0.08);
+}
+
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 body {
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  margin: 0;
   height: 100vh;
+  background:
+    radial-gradient(circle at 20% 10%, #0ea5e940, transparent),
+    radial-gradient(circle at 80% 90%, #38bdf840, transparent),
+    #020617;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #e5e7eb;
 }
 
+/* ================= MAIN CARD ================= */
 .container {
-  width: 360px;
-  padding: 30px;
-  border-radius: 18px;
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 0 40px rgba(56,189,248,0.2);
-  text-align: center;
+  width: 420px;
+  padding: 28px;
+  border-radius: 22px;
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: slideUp 0.8s ease;
 }
 
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= HEADINGS ================= */
 .title {
-  color: #38bdf8;
+  text-align: center;
   font-size: 26px;
-  margin-bottom: 6px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-  color: #94a3b8;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  text-align: left;
-  margin-bottom: 15px;
-}
-
-label {
+  text-align: center;
   font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 18px;
+}
+
+/* ================= INPUTS ================= */
+label {
+  font-size: 12px;
   color: #7dd3fc;
+  margin-top: 14px;
+  display: block;
 }
 
-select, input {
+input, select {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  background: #020617;
-  color: white;
-  border: 1px solid #1e293b;
+  padding: 12px;
+  border-radius: 14px;
   margin-top: 6px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: white;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px #38bdf820;
+}
+
+/* ================= CURRENT TOPIC ================= */
 .current-topic {
-  background: #020617;
-  border-radius: 14px;
-  padding: 12px;
-  margin: 20px 0;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #020617, #020617);
+  border: 1px solid #1e293b;
+  text-align: center;
 }
 
 .current-topic p {
-  font-size: 12px;
+  font-size: 11px;
   color: #7dd3fc;
+  margin: 0;
 }
 
 .current-topic h3 {
   font-size: 15px;
-  margin-top: 5px;
+  margin-top: 6px;
 }
 
+/* ================= MIC ================= */
 .mic-circle {
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  margin: 15px auto;
-  border: 3px solid #38bdf8;
+  margin: 22px auto;
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 40px;
-  box-shadow: 0 0 25px rgba(56,189,248,0.7);
+  justify-content: center;
+  font-size: 42px;
+  background: radial-gradient(circle, #020617, #020617);
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 30px #38bdf850;
+  transition: all 0.4s ease;
 }
 
-.speaker {
-  margin-top: 10px;
-  font-size: 15px;
+.mic-active {
+  animation: micPulse 1.2s infinite;
+  box-shadow: 0 0 60px #38bdf8;
 }
 
+@keyframes micPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.mic-stop {
+  opacity: 0.4;
+  transform: scale(0.92);
+}
+
+/* ================= TIMER ================= */
 .timer {
+  font-size: 46px;
+  font-weight: 700;
+  text-align: center;
   color: #facc15;
-  font-size: 48px;
-  margin: 15px 0;
 }
 
-.btn {
+/* ================= BUTTONS ================= */
+button {
   width: 100%;
-  padding: 12px;
-  border-radius: 12px;
+  padding: 14px;
+  border-radius: 16px;
   border: none;
-  font-size: 15px;
   cursor: pointer;
-  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 
 .start {
   background: linear-gradient(90deg, #38bdf8, #0ea5e9);
   color: #020617;
+  margin-top: 10px;
+}
+
+.start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px #38bdf860;
 }
 
 .stop {
-  background: #020617;
+  margin-top: 10px;
+  background: transparent;
   border: 1px solid #334155;
   color: #94a3b8;
+}
+
+.stop:hover {
+  background: #020617;
+}
+
+/* ================= TRANSCRIPT ================= */
+.transcript {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  min-height: 70px;
+  font-size: 13px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ================= SCORES ================= */
+#scores p {
+  font-size: 13px;
+  padding: 6px 10px;
+  background: #020617;
+  border-radius: 10px;
+  margin: 6px 0;
+  border-left: 3px solid #38bdf8;
 }

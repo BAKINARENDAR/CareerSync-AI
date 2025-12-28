@@ -143,3 +143,29 @@ body {
     text-align: center !important;
     text-shadow: 0 0 10px #ff9800 !important;
 }
+header {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+}
+.logo {
+  font-family: 'Inter', sans-serif;
+  font-size: 26px; 
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+.grad {
+  background: linear-gradient(
+    90deg,
+    #5ee7ff,
+    #7bb7ff,
+    #ffffff
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow:
+    0 0 8px rgba(94, 231, 255, 0.6),
+    0 0 18px rgba(123, 183, 255, 0.4);
+}

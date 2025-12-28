@@ -2,58 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CareerSync AI | Group Discussion</title>
+  <title>CareerSync AI - Group Discussion</title>
   <link rel="stylesheet" href="gd.css">
 </head>
 <body>
 
 <div class="container">
 
-  <!-- HEADER -->
   <h1 class="title">Group Discussion</h1>
   <p class="subtitle">AI-based GD Evaluation Module</p>
 
-  <!-- CONFIG SECTION -->
-  <label>Discussion Topic</label>
+  <label>Choose Topic</label>
   <select id="topic">
-    <option>Impact of AI on Employment</option>
-    <option>Remote Work vs Office Work</option>
+    <option> impact of AI on Employment</option>
+    <option>Is Remote Work the Future?</option>
     <option>Social Media – Boon or Bane</option>
   </select>
 
-  <label>Number of Participants</label>
-  <input type="number" id="count" min="2" max="6" placeholder="2 – 6">
+  <label>No. of Participants</label>
+  <input type="number" id="count" min="2" max="6" placeholder="Enter count">
 
-  <button class="start" onclick="createParticipants()">Create Participants</button>
+  <button onclick="generateParticipants()">Add Participants</button>
 
-  <div id="participantInputs"></div>
+  <div id="participants"></div>
 
-  <!-- CURRENT TOPIC -->
   <div class="current-topic">
     <p>Current Topic</p>
     <h3 id="currentTopic">—</h3>
   </div>
 
-  <!-- MIC -->
   <div class="mic-circle" id="mic">🎤</div>
 
-  <!-- STATUS -->
-  <p class="speaker">
-    Speaker: <strong id="activeSpeaker">—</strong>
-  </p>
+  <p class="speaker">Speaker: <span id="speaker">—</span></p>
+  <h1 class="timer" id="timer">60</h1>
 
-  <div class="timer" id="timer">60</div>
+  <button class="start" onclick="startSpeaking()">Start Speaking</button>
+  <button class="stop" onclick="stopSpeaking()">Stop</button>
 
-  <!-- CONTROLS -->
-  <button class="start" onclick="startTurn()">Start Speaking</button>
-  <button class="stop" onclick="stopTurn()">Stop</button>
+  <h3>Live Transcript</h3>
+  <div class="transcript" id="transcript"></div>
 
-  <!-- TRANSCRIPT -->
-  <label>Live Speech Transcript</label>
-  <div class="transcript" id="transcript">—</div>
-
-  <!-- SCORES -->
-  <label>Participant Scores</label>
+  <h3>Scores</h3>
   <div id="scores"></div>
 
 </div>

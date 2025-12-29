@@ -1,208 +1,149 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-:root {
-  --primary: #38bdf8;
-  --secondary: #0ea5e9;
-  --bg-dark: #020617;
-  --glass: rgba(15, 23, 42, 0.65);
-  --border-glass: rgba(255,255,255,0.08);
-}
-
-* {
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 body {
-  margin: 0;  
+  margin: 0;
   height: 100vh;
-  background:
-    radial-gradient(circle at 20% 10%, #0ea5e940, transparent),
-    radial-gradient(circle at 80% 90%, #38bdf840, transparent),
-    #020617;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: radial-gradient(circle at top, #0b1229, #020617);
   color: #e5e7eb;
+  font-family: Inter, sans-serif;
+  overflow: hidden;
 }
 
-/* ================= MAIN CARD ================= */
-.container {
-  width: 420px;
-  padding: 28px;
-  border-radius: 22px;
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-  animation: slideUp 0.8s ease;
+
+
+
+/* HEADER */
+.top {
+  position: absolute;
+  top: 20px;
+  left: 30px;
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+.top span {
+  color: #38bdf8;
 }
 
-/* ================= HEADINGS ================= */
-.title {
-  text-align: center;
-  font-size: 26px;
-  font-weight: 700;
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* CENTER */
+.center {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
 }
 
-.subtitle {
-  text-align: center;
+/* TEXT */
+.module {
+  font-size: 30px;
+  color: #38bdf8;
+}
+
+.label {
   font-size: 13px;
   color: #94a3b8;
-  margin-bottom: 18px;
 }
 
-/* ================= INPUTS ================= */
-label {
-  font-size: 12px;
-  color: #7dd3fc;
-  margin-top: 14px;
-  display: block;
+.value {
+  font-size: 16px;
 }
 
-input, select {
-  width: 100%;
+/* INPUT */
+input {
+  width: 280px;
   padding: 12px;
   border-radius: 14px;
-  margin-top: 6px;
+  border: 1px solid #1e293b;
   background: #020617;
-  border: 1px solid #1e293b;
   color: white;
-  outline: none;
-  transition: all 0.3s ease;
 }
 
-input:focus, select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px #38bdf820;
+/* BUTTON */
+.primary {
+  padding: 14px 26px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(90deg,#38bdf8,#0ea5e9);
+  color: #020617;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-/* ================= CURRENT TOPIC ================= */
-.current-topic {
-  margin-top: 18px;
-  padding: 14px;
-  border-radius: 16px;
-  background: linear-gradient(145deg, #020617, #020617);
-  border: 1px solid #1e293b;
-  text-align: center;
-}
-
-.current-topic p {
-  font-size: 11px;
-  color: #7dd3fc;
-  margin: 0;
-}
-
-.current-topic h3 {
-  font-size: 15px;
-  margin-top: 6px;
-}
-
-/* ================= MIC ================= */
+/* MIC */
 .mic-circle {
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
-  margin: 22px auto;
+  border: 2px solid #38bdf8;
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 42px;
-  background: radial-gradient(circle, #020617, #020617);
-  border: 2px solid var(--primary);
-  box-shadow: 0 0 30px #38bdf850;
-  transition: all 0.4s ease;
+  align-items: center;
+  font-size: 48px;
+  box-shadow: 0 0 30px #38bdf860;
+  cursor: pointer;
 }
 
 .mic-active {
-  animation: micPulse 1.2s infinite;
-  box-shadow: 0 0 60px #38bdf8;
+  animation: pulse 1.2s infinite;
 }
 
-@keyframes micPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(1); }
+@keyframes pulse {
+  50% { transform: scale(1.1); }
 }
 
-.mic-stop {
-  opacity: 0.4;
-  transform: scale(0.92);
+/* PARTICIPANTS */
+.participants-box {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-/* ================= TIMER ================= */
-.timer {
-  font-size: 46px;
-  font-weight: 700;
-  text-align: center;
-  color: #facc15;
-}
-
-/* ================= BUTTONS ================= */
-button {
-  width: 100%;
-  padding: 14px;
+.participant {
+  padding: 10px 18px;
   border-radius: 16px;
-  border: none;
+  border: 1px solid #1e293b;
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  transition: all 0.25s ease;
 }
 
-.start {
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+.participant.active {
+  background: #22c55e;
   color: #020617;
-  margin-top: 10px;
 }
 
-.start:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px #38bdf860;
+/* BOX */
+.answer-box {
+  width: 320px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #1e293b;
+  background: rgba(2,6,23,0.6);
 }
-
-.stop {
-  margin-top: 10px;
-  background: transparent;
-  border: 1px solid #334155;
+.hint {
+  font-size: 12px;
   color: #94a3b8;
 }
 
-.stop:hover {
-  background: #020617;
+.form-box {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* ================= TRANSCRIPT ================= */
-.transcript {
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 14px;
-  background: #020617;
-  border: 1px solid #1e293b;
-  min-height: 70px;
-  font-size: 13px;
-  animation: fadeIn 0.3s ease;
+#participantsContainer input {
+  margin-top: 8px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 
-/* ================= SCORES ================= */
-#scores p {
-  font-size: 13px;
-  padding: 6px 10px;
-  background: #020617;
-  border-radius: 10px;
-  margin: 6px 0;
-  border-left: 3px solid #38bdf8;
+.stars {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1px 1px at 20% 30%, #8ecbff, transparent),
+    radial-gradient(1px 1px at 70% 80%, #8ecbff, transparent),
+    radial-gradient(1px 1px at 50% 60%, #8ecbff, transparent);
+  opacity: 0.4;
+  pointer-events: none;   /* 🔥 THIS IS THE FIX */
+  z-index: 0;
 }

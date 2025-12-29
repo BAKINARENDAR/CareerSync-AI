@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CareerSync AI | GD Room</title>
+  <link rel="stylesheet" href="gd.css" />
+</head>
+<body>
+
+<div class="stars"></div>
+
+<header class="top">
+  <h2>CareerSync <span>AI</span></h2>
+</header>
+
+<main class="center">
+
+  <h3 class="module">Group Discussion</h3>
+
+  <div class="info">
+    <p class="label">Current Topic:</p>
+    <p class="value" id="topicText"></p>
+  </div>
+
+  <!-- MIC -->
+  <div class="mic-circle" id="mic">🎤</div>
+  <p class="hint">
+  Select your name to start • Click mic to stop
+</p>
+
+  <p class="status" id="status">
+    Click your name to start speaking
+  </p>
+
+  <!-- PARTICIPANTS -->
+  <div class="participants-box" id="participantBoxes"></div>
+
+  <!-- TRANSCRIPT -->
+  <div class="info">
+    <p class="label">Recognized Speech:</p>
+    <div class="answer-box" id="transcript">—</div>
+  </div>
+
+  <!-- SCORES -->
+  <div class="info">
+    <p class="label">Scores:</p>
+    <div id="scores"></div>
+  </div>
+
+</main>
+
+<script src="gd-room.js"></script>
+</body>
+</html>

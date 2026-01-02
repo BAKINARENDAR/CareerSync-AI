@@ -169,3 +169,6 @@ header {
     0 0 8px rgba(94, 231, 255, 0.6),
     0 0 18px rgba(123, 183, 255, 0.4);
 }
+.CareerSync:hover{
+    cursor: pointer;
+}

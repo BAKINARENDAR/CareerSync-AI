@@ -157,3 +157,6 @@ header {
   font-size: 18px;
   color: #9aa4b2;
 }
+.CareerSync:hover{
+    cursor: pointer;
+}

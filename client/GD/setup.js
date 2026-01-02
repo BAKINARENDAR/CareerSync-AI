@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
   localStorage.setItem("gdParticipants", JSON.stringify(names));
 
   // ✅ REDIRECT TO GD ROOM
-  window.location.href = "/GD/gd-room.html";
+  window.location.href = "gd-room.html";
 });
 
 

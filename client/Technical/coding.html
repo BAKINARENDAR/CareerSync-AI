@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CareerSync AI | Two Sum</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="technical.css">
+    <style>
+        body { background-color: #1a1a1a; color: #eff1f6; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+        .coding-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: calc(100vh - 65px); padding: 12px; margin-top: 50px; box-sizing: border-box; }
+        .problem-sidebar { background: #282828; border-radius: 8px; padding: 20px; overflow-y: auto; font-size: 14px; border: 1px solid #333; }
+        .example-box { background: #333; padding: 12px; border-radius: 8px; margin: 12px 0; font-family: 'Menlo', monospace; font-size: 13px; border-left: 4px solid #5ee7ff; }
+        .right-panel { display: flex; flex-direction: column; gap: 8px; position: relative; }
+        #editor-container { flex-grow: 1; border-radius: 0 0 8px 8px; border: 1px solid #333; overflow: hidden; background: #1e1e1e; }
+        
+        /* Fixed Dropdown Theme */
+        .editor-header { background: #333; padding: 8px 15px; border-radius: 8px 8px 0 0; display: flex; align-items: center; border: 1px solid #333; border-bottom: none; }
+        #langSelect { background: #333; color: #fff; border: none; font-size: 13px; outline: none; cursor: pointer; }
+        #langSelect option { background: #1e1e1e; color: #fff; }
+
+        .action-bar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 5px 0; }
+        .btn { padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; }
+        .btn-run { background: #3e3e3e; color: #fff; }
+        .btn-submit { background: #2cbb5d; color: #fff; }
+        .mic-btn-circle { width: 36px; height: 36px; border-radius: 50%; background: #282828; display: flex; align-items: center; justify-content: center; color: #5ee7ff; border: 1px solid #5ee7ff; cursor: pointer; }
+
+        /* Console */
+        .console-panel { background: #282828; border-radius: 8px; height: 160px; display: flex; flex-direction: column; border: 1px solid #333; }
+        #consoleOutput { padding: 15px; font-family: 'Menlo', monospace; font-size: 13px; color: #fff; overflow-y: auto; }
+        .running-text { color: #5ee7ff; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        /* Victory Overlay */
+        #victoryOverlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26, 26, 26, 0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; }
+        .tick-mark { font-size: 60px; color: #2cbb5d; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <header style="padding: 12px 25px; position: fixed; top: 0; width: 100%; background: #1a1a1a; z-index: 1000; border-bottom: 1px solid #333;">
+        <div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div>
+    </header>
+
+    <div class="coding-container">
+        <div class="problem-sidebar">
+            <h2>1. Two Sum</h2>
+            <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return <i>indices of the two numbers such that they add up to <code>target</code></i>.</p>
+            <div class="example-box"><b>Example 1:</b><br>Input: nums = [2,7,11,15], target = 9<br>Output: [0,1]</div>
+            <div class="example-box"><b>Example 2:</b><br>Input: nums = [3,2,4], target = 6<br>Output: [1,2]</div>
+            <div class="example-box"><b>Example 3:</b><br>Input: nums = [3,3], target = 6<br>Output: [0,1]</div>
+            <div id="aiChat" style="margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; color: #5ee7ff; font-style: italic;"></div>
+        </div>
+
+        <div class="right-panel">
+            <div id="victoryOverlay">
+                <i class="fa-solid fa-circle-check tick-mark"></i>
+                <div style="color: #2cbb5d; font-size: 24px; font-weight: bold;">Successfully Submitted!</div>
+                <button class="btn btn-run" style="margin-top: 20px;" onclick="document.getElementById('victoryOverlay').style.display='none'">Back to Code</button>
+            </div>
+
+            <div class="editor-header">
+                <select id="langSelect" onchange="changeLanguage()">
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                </select>
+            </div>
+            <div id="editor-container"></div>
+            
+            <div class="action-bar">
+                <div class="mic-btn-circle" id="micBtn"><i class="fa-solid fa-microphone"></i></div>
+                <button class="btn btn-run" onclick="runLogic(false)">Run</button>
+                <button class="btn btn-submit" onclick="runLogic(true)">Submit</button>
+            </div>
+
+            <div class="console-panel">
+                <div id="consoleOutput">> Click "Run" to validate your solution.</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+    <script src="coding.js"></script>
+</body>
+</html>

@@ -1,286 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CareerSync AI | Technical Interview</title>
-  <link rel="icon" href="favicon.png" type="image/png">
-  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../images/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
-    body { background: #191b2a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareerSync AI | Technical Interview</title>
+    <link rel="icon" href="favicon.png" type="image/png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../images/favicon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../images/favicon.png"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
 
-    header { position: absolute; top: 20px; left: 20px; z-index: 10; }
-    .logo { font-size: 26px; font-weight: 600; }
-    .grad { background: linear-gradient(90deg,#5ee7ff,#7bb7ff,#fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    <style>
+      /* CORE STYLES */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+      body {
+        background: #191b2a;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+      }
+      header {
+        padding: 20px;
+        z-index: 10;
+      }
+      .logo {
+        font-size: 26px;
+        font-weight: 600;
+      }
+      .grad {
+        background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-    .tech-container { width: 100%; max-width: 1200px; text-align: center; display: flex; flex-direction: column; align-items: center; padding: 20px; flex: 1; justify-content: center; margin-top: 40px; }
+      .tech-container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        flex: 1;
+      }
 
-    .voice-circle {
-      width: 260px; height: 260px; border-radius: 50%; border: 8px solid white;
-      box-shadow: 0 0 30px #fff, 0 0 60px #5ee7ff, inset 0 0 40px #5ee7ff;
-      display: flex; justify-content: center; align-items: center;
-      cursor: not-allowed; transition: all 0.5s ease;
-      background: rgba(38, 53, 86, 0.5); position: relative; margin: 30px auto;
-    }
-    .mic-icon { font-size: 90px; color: #7ed9f8; transition: 0.3s; }
+      /* MIC & WAVEFORM */
+      .voice-circle {
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        border: 8px solid white;
+        box-shadow: 0 0 30px #fff, 0 0 60px #5ee7ff, inset 0 0 40px #5ee7ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: not-allowed;
+        transition: all 0.5s ease;
+        background: rgba(38, 53, 86, 0.5);
+        position: relative;
+      }
+      .mic-icon {
+        font-size: 80px;
+        color: #7ed9f8;
+      }
+      .waveform {
+        display: none;
+        position: absolute;
+        width: 100%;
+        height: 80px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+      }
+      .bar {
+        width: 8px;
+        height: 30px;
+        background: #5ee7ff;
+        border-radius: 10px;
+        animation: pulse-wave 1.2s infinite;
+      }
+      @keyframes pulse-wave {
+        0%,
+        100% {
+          transform: scaleY(1);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scaleY(2);
+          opacity: 1;
+        }
+      }
+      .speaking .waveform {
+        display: flex;
+      }
+      .speaking .mic-icon {
+        opacity: 0;
+      }
+      .active-mic {
+        box-shadow: 0 0 60px #fff, 0 0 100px #5ee7ff !important;
+        cursor: pointer !important;
+      }
+      .disabled-mic {
+        opacity: 0.3;
+      }
 
-    .waveform {
-      display: none; position: absolute; width: 100%; height: 80px;
-      justify-content: center; align-items: center; gap: 8px;
-    }
-    .bar { width: 8px; height: 30px; background: #5ee7ff; border-radius: 10px; animation: pulse-wave 1.2s ease-in-out infinite; }
-    .bar:nth-child(1) { animation-delay: 0.1s; }
-    .bar:nth-child(2) { animation-delay: 0.3s; }
-    .bar:nth-child(3) { animation-delay: 0.2s; }
-    .bar:nth-child(4) { animation-delay: 0.4s; }
-    .bar:nth-child(5) { animation-delay: 0.1s; }
+      /* MESSAGES */
+      .msg {
+        max-width: 85%;
+        padding: 14px 18px;
+        border-radius: 16px;
+        font-size: 15px;
+        margin-bottom: 15px;
+        line-height: 1.6;
+        animation: fadeIn 0.3s ease;
+      }
+      .ai-msg {
+        background: #263556;
+        border: 1px solid rgba(94, 231, 255, 0.4);
+        align-self: flex-start;
+      }
+      .user-msg {
+        background: #1b233f;
+        border: 1px solid rgba(123, 183, 255, 0.4);
+        align-self: flex-start;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+        }
+      }
 
-    @keyframes pulse-wave {
-      0%, 100% { transform: scaleY(1); opacity: 0.6; }
-      50% { transform: scaleY(2); opacity: 1; box-shadow: 0 0 20px #5ee7ff; }
-    }
+      /* BUTTONS */
+      .start-btn,
+      .end-btn {
+        padding: 16px 45px;
+        border-radius: 16px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+      }
+      .start-btn {
+        background: #263556;
+        color: white;
+        border: 1px solid rgba(106, 169, 255, 0.4);
+        display: block;
+        margin: 40px auto;
+      }
+      .end-btn {
+        background: #ef4743;
+        color: white;
+        display: none;
+      }
+      .options button {
+        width: 100%;
+        padding: 15px;
+        margin-top: 10px;
+        background: #263556;
+        border: 1px solid #5ee7ff;
+        border-radius: 12px;
+        color: white;
+        cursor: pointer;
+      }
 
-    .speaking .waveform { display: flex; }
-    .speaking .mic-icon { opacity: 0; }
-    .active-mic { box-shadow: 0 0 60px #fff, 0 0 100px #5ee7ff !important; border: 8px solid #fff; cursor: pointer !important; }
-    .disabled-mic { opacity: 0.3; cursor: default !important; box-shadow: none !important; border: 8px solid rgba(255,255,255,0.2); }
+      /* ========================================== */
+      /* WEB VIEW (1024px+)                         */
+      /* ========================================== */
+      @media (min-width: 1024px) {
+        .interview-layout {
+          display: none; /* Controlled by JS */
+          grid-template-columns: 400px 1fr;
+          gap: 50px;
+          margin-top: 20px;
+        }
+        .chat-column {
+          height: 70vh;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          scrollbar-width: none;
+        }
+        .center-column {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          padding-top: 40px;
+        }
+        .options {
+          width: 300px;
+          margin-top: 30px;
+        }
+        #micStatus {
+          margin: 20px 0;
+        }
+      }
 
-    .start-btn, .end-btn { 
-      margin: 20px 0; padding: 16px 45px; border-radius: 16px; background: #263556; 
-      border: 1px solid rgba(106,169,255,.4); color: white; font-size: 19px; font-weight: 600; cursor: pointer; 
-    }
-    .end-btn { background: #ef4743; border: none; display: none; }
-
-    .interview-layout { display: none; width: 100%; margin-top: 20px; height: auto; }
-
-    .chat-container {
-      width: 100%; padding: 15px; overflow-y: auto; display: flex; flex-direction: column;
-      gap: 18px; max-height: 50vh; scrollbar-width: none;
-    }
-    .chat-container::-webkit-scrollbar { display: none; }
-
-    .msg { max-width: 95%; padding: 14px 18px; border-radius: 16px; font-size: 15.5px; line-height: 1.6; word-break: break-word; animation: fadeIn 0.3s ease; }
-    .ai-msg { background: #263556; border: 1px solid rgba(94,231,255,.4); align-self: flex-start; }
-    .user-msg { background: #1b233f; border: 1px solid rgba(123,183,255,.4); align-self: flex-end; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .options button { width: 90%; max-width: 400px; margin: 12px auto; padding: 16px; background: #263556; border: 1px solid rgba(106,169,255,.4); color: white; border-radius: 14px; cursor: pointer; font-size: 18px; display: block; }
-
-    @media (max-width: 767px) {
-      header { top: 15px; left: 15px; }
-      .logo { font-size: 22px; }
-      .tech-container { margin-top: 60px; padding: 15px; }
-      .voice-circle { width: 240px; height: 240px; border-width: 7px; margin: 30px auto; }
-      .mic-icon { font-size: 85px; }
-      .start-btn, .end-btn { padding: 15px 40px; font-size: 18px; }
-      #micStatus { font-size: 16px; margin: 15px 0; }
-      #aiChat, #userChat { display: none; }
-      .interview-layout { grid-template-columns: 1fr; gap: 15px; }
-      .center-column { order: -1; }
-      .chat-container { max-height: 38vh; padding: 10px; }
-      .msg { font-size: 15px; padding: 13px 16px; }
-    }
-
-    @media (min-width: 768px) and (max-width: 1023px) {
-      .voice-circle { width: 280px; height: 280px; }
-      .interview-layout { grid-template-columns: 1fr 400px 1fr; gap: 30px; height: 520px; }
-    }
-
-    @media (min-width: 1024px) {
-      .voice-circle { width: 220px; height: 220px; }
-      .interview-layout { grid-template-columns: 1fr 320px 1fr; gap: 20px; height: 480px; margin-top: -50px; }
-    }
-  </style>
-</head>
-<body>
-
-<header><div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div></header>
-
-<section class="tech-container">
-  <div class="voice-circle" id="micBtn">
-    <i class="fa-solid fa-microphone mic-icon"></i>
-    <div class="waveform" id="waveform">
-      <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
-    </div>
-  </div>
-  <p id="micStatus" style="color: #5ee7ff; font-weight: 500; font-size: 17px; margin: 15px 0;">Ready</p>
-
-  <button class="start-btn" id="startBtn">Start Technical Interview</button>
-  <button class="end-btn" id="endBtn">End Session</button>
-
-  <div class="interview-layout" id="interviewLayout">
-    <div class="chat-container" id="unifiedChat"></div>
-
-    <div class="chat-column" id="aiChat"></div>
-    <div class="center-column" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
-      <div class="options" id="options" style="display: none;">
-        <button onclick="window.open('coding.html', '_blank')">Coding Interview</button>
-        <button onclick="window.open('concepts.html', '_blank')">Technical Concepts</button>
+      /* ========================================== */
+      /* MOBILE VIEW (Original Responsiveness)      */
+      /* ========================================== */
+      @media (max-width: 1023px) {
+        .tech-container {
+          text-align: center;
+        }
+        .interview-layout {
+          display: none;
+          flex-direction: column;
+          align-items: center;
+        }
+        .chat-column {
+          width: 100%;
+          max-height: 40vh;
+          overflow-y: auto;
+          margin-top: 20px;
+          display: flex;
+          flex-direction: column;
+        }
+        .center-column {
+          order: -1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .voice-circle {
+          width: 200px;
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <span class="grad">C</span>areer<span class="grad">S</span>ync
+        <span class="grad">A</span>I
       </div>
-    </div>
-    <div class="chat-column" id="userChat"></div>
-  </div>
-</section>
+    </header>
 
-<script>
-    const startBtn = document.getElementById("startBtn");
-    const endBtn = document.getElementById("endBtn");
-    const interviewLayout = document.getElementById("interviewLayout");
-    const unifiedChat = document.getElementById("unifiedChat");
-    const aiChat = document.getElementById("aiChat"), userChat = document.getElementById("userChat");
-    const micBtn = document.getElementById("micBtn");
-    const micStatus = document.getElementById("micStatus");
-    const options = document.getElementById("options");
+    <section class="tech-container">
+      <button class="start-btn" id="startBtn">Start Technical Interview</button>
 
-    let studentName = "";
-    let canUseMic = false;
-    let recognition = null;
+      <div class="interview-layout" id="interviewLayout">
+        <div class="chat-column" id="chatFeed"></div>
 
-    function toggleWaveform(active) {
-        if (active) micBtn.classList.add("speaking");
-        else micBtn.classList.remove("speaking");
-    }
+        <div class="center-column">
+          <div class="voice-circle" id="micBtn">
+            <i class="fa-solid fa-microphone mic-icon"></i>
+            <div class="waveform" id="waveform">
+              <span class="bar"></span><span class="bar"></span
+              ><span class="bar"></span><span class="bar"></span
+              ><span class="bar"></span>
+            </div>
+          </div>
 
-    function addMessage(text, sender) {
+          <p
+            id="micStatus"
+            style="
+              color: #5ee7ff;
+              font-weight: 500;
+              font-size: 17px;
+              margin: 15px 0;
+            "
+          >
+            Ready
+          </p>
+
+          <button class="end-btn" id="endBtn">End Session</button>
+
+          <div class="options" id="options" style="display: none">
+            <button onclick="window.open('coding.html', '_blank')">
+              Coding Interview
+            </button>
+            <button onclick="window.open('concepts.html', '_blank')">
+              Technical Concepts
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      const startBtn = document.getElementById("startBtn");
+      const endBtn = document.getElementById("endBtn");
+      const interviewLayout = document.getElementById("interviewLayout");
+      const chatFeed = document.getElementById("chatFeed");
+      const micBtn = document.getElementById("micBtn");
+      const micStatus = document.getElementById("micStatus");
+      const options = document.getElementById("options");
+
+      let studentName = "";
+      let canUseMic = false;
+      let recognition = null;
+
+      function addMessage(text, sender) {
         const msg = document.createElement("div");
         msg.className = `msg ${sender}-msg`;
-        msg.innerHTML = `<b>${sender === "ai" ? "CareerSync AI" : "You"}:</b><br>${text}`;
+        msg.innerHTML = `<b>${
+          sender === "ai" ? "CareerSync AI" : "You"
+        }:</b><br>${text}`;
+        chatFeed.appendChild(msg);
+        chatFeed.scrollTop = chatFeed.scrollHeight;
+      }
 
-        unifiedChat.appendChild(msg.cloneNode(true));
-        (sender === "ai" ? aiChat : userChat).appendChild(msg);
+      function toggleWaveform(active) {
+        if (active) micBtn.classList.add("speaking");
+        else micBtn.classList.remove("speaking");
+      }
 
-        unifiedChat.scrollTop = unifiedChat.scrollHeight;
-        aiChat.scrollTop = aiChat.scrollHeight;
-        userChat.scrollTop = userChat.scrollHeight;
-    }
-
-    async function speakAI(text) {
+      async function speakAI(text) {
         window.speechSynthesis.cancel();
         canUseMic = false;
         micBtn.classList.add("disabled-mic");
-        
+
         const utter = new SpeechSynthesisUtterance(text);
         utter.onstart = () => {
-            toggleWaveform(true);
-            micStatus.innerText = "Interviewer is speaking...";
+          toggleWaveform(true);
+          micStatus.innerText = "Interviewer is speaking...";
         };
         utter.onend = () => {
-            toggleWaveform(false);
-            if (!studentName) {
-                canUseMic = true;
-                micBtn.classList.remove("disabled-mic");
-                micBtn.classList.add("active-mic");
-                micStatus.innerText = "Tap the mic and say your name";
-            } else {
-                micStatus.innerText = "Please select a module below";
-                options.style.display = "block";
-            }
+          toggleWaveform(false);
+          if (!studentName) {
+            canUseMic = true;
+            micBtn.classList.remove("disabled-mic");
+            micBtn.classList.add("active-mic");
+            micStatus.innerText = "Tap the mic and say your name";
+          } else {
+            micStatus.innerText = "Please select a module below";
+            options.style.display = "block";
+            micBtn.classList.add("disabled-mic");
+          }
         };
         speechSynthesis.speak(utter);
         addMessage(text, "ai");
-    }
+      }
 
-    function initSpeechRecognition() {
-        if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-            micStatus.innerText = "Speech recognition not supported in this browser";
-            micStatus.style.color = "#ff6b6b";
-            return false;
+      function initSpeechRecognition() {
+        if (
+          !(
+            "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+          )
+        ) {
+          micStatus.innerText = "Browser not supported";
+          return false;
         }
-
-        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition = new (window.SpeechRecognition ||
+          window.webkitSpeechRecognition)();
         recognition.lang = "en-IN";
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
         recognition.onresult = (event) => {
-            toggleWaveform(false);
-            const transcript = event.results[0][0].transcript.trim();
-            if (transcript) {
-                addMessage(transcript, "user");
-
-                const words = transcript.toLowerCase().split(" ");
-                studentName = words[words.length - 1].replace(/[^a-z]/gi, '');
-                if (studentName) studentName = studentName.charAt(0).toUpperCase() + studentName.slice(1);
-                localStorage.setItem("studentName", studentName);
-
-                setTimeout(() => {
-                    speakAI(`Nice to meet you, ${studentName}. You can now choose a module to begin your technical assessment.`);
-                }, 800);
-            }
+          const transcript = event.results[0][0].transcript.trim();
+          addMessage(transcript, "user");
+          const words = transcript.split(" ");
+          studentName = words[words.length - 1];
+          setTimeout(
+            () =>
+              speakAI(
+                `Nice to meet you, ${studentName}. Choose a module to begin.`
+              ),
+            800
+          );
         };
-
-        recognition.onerror = (event) => {
-            toggleWaveform(false);
-            micBtn.classList.remove("active-mic");
-            canUseMic = true; // Allow retry
-
-            if (event.error === 'not-allowed') {
-                micStatus.innerText = "Microphone access denied. Please allow it in browser settings.";
-                micStatus.style.color = "#ff6b6b";
-            } else if (event.error === 'no-speech') {
-                micStatus.innerText = "No speech detected. Tap mic and try again.";
-            } else {
-                micStatus.innerText = "Speech error. Tap mic to retry.";
-            }
-        };
-
         recognition.onend = () => {
-            toggleWaveform(false);
-            micBtn.classList.remove("active-mic");
-            if (canUseMic) {
-                micStatus.innerText = !studentName ? "Tap the mic and say your name" : "Please select a module below";
-            }
+          toggleWaveform(false);
+          micBtn.classList.remove("active-mic");
         };
-
         return true;
-    }
+      }
 
-    startBtn.onclick = () => {
+      startBtn.onclick = () => {
         startBtn.style.display = "none";
         endBtn.style.display = "block";
-        interviewLayout.style.display = "grid";
+        interviewLayout.style.display =
+          window.innerWidth >= 1024 ? "grid" : "flex";
+        if (initSpeechRecognition())
+          speakAI(
+            "Hello, I am CareerSync AI. Please introduce yourself by tapping on the microphone and saying your name."
+          );
+      };
 
-        if (!initSpeechRecognition()) return;
-
-        speakAI("Hello, I am CareerSync AI. Please introduce yourself by tapping on the microphone and saying your name.");
-        
-        canUseMic = true;
-        micBtn.classList.remove("disabled-mic");
-        micBtn.classList.add("active-mic");
-        micStatus.innerText = "Tap the mic and say your name";
-    };
-
-    endBtn.onclick = () => {
+      endBtn.onclick = () => {
         window.speechSynthesis.cancel();
-        if (recognition) recognition.abort();
-        localStorage.removeItem("studentName");
         location.reload();
-    };
+      };
 
-    micBtn.onclick = () => {
+      micBtn.onclick = () => {
         if (!canUseMic || !recognition) return;
-
-        if (micBtn.classList.contains("speaking")) {
-            recognition.stop();
-            return;
-        }
-
-        try {
-            recognition.start();
-            toggleWaveform(true);
-            micStatus.innerText = "Listening... Speak now";
-        } catch (e) {
-            micStatus.innerText = "Tap again to allow microphone";
-        }
-    };
-</script>
-</body>
+        recognition.start();
+        toggleWaveform(true);
+        micStatus.innerText = "Listening...";
+      };
+    </script>
+  </body>
 </html>

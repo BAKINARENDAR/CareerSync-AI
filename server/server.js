@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const interviewRoutes = require('./routes/interview');
-app.use('/api', interviewRoutes);
+const routes = require('./routes');
+app.use('/api', routes);
+
 
 app.get('/api/health', (req, res) => {
   res.json({ 

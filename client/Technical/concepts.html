@@ -1,39 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CareerSync AI | Technical Concepts</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="technical.css"> </head>
+    <meta charset="UTF-8">
+    <title>CareerSync AI | Core Concepts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
+        body { background: #191b2a; color: white; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        header { position: absolute; top: 20px; left: 30px; z-index: 100; }
+        .logo { font-size: 26px; font-weight: 600; }
+        .grad { background: linear-gradient(90deg,#5ee7ff,#7bb7ff,#fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .tech-container { width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+        
+        /* Subject Buttons */
+        .subject-group { display: flex; gap: 15px; margin-bottom: 30px; }
+        .sub-btn { 
+            padding: 14px 28px; border-radius: 12px; background: #263556; color: white; 
+            border: 1px solid #5ee7ff; cursor: pointer; font-weight: 600; transition: 0.3s;
+        }
+        .sub-btn:hover { background: #32467a; box-shadow: 0 0 15px #5ee7ff; }
+
+        /* Professional Centered Grid */
+        .interview-layout { display: none; width: 100%; grid-template-columns: 1fr 320px 1fr; gap: 25px; align-items: center; padding: 0 40px; }
+
+        /* Hidden Scrollbars */
+        .chat-column { 
+            height: 500px; overflow-y: scroll; display: flex; flex-direction: column; gap: 15px; padding: 10px; 
+            scrollbar-width: none; -ms-overflow-style: none; 
+        }
+        .chat-column::-webkit-scrollbar { display: none; }
+
+        .msg { max-width: 90%; padding: 14px 18px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+        .ai-msg { background: #263556; border: 1px solid rgba(94,231,255,0.3); align-self: flex-start; }
+        .user-msg { background: #1b233f; border: 1px solid rgba(123,183,255,0.3); align-self: flex-end; }
+
+        /* Centered Area with Mic Caption */
+        .center-area { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .voice-circle {
+            width: 220px; height: 220px; border-radius: 50%; border: 6px solid white;
+            box-shadow: 0 0 25px #fff, 0 0 50px #5ee7ff; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; background: rgba(38, 53, 86, 0.6); transition: 0.4s;
+        }
+        .active-mic { box-shadow: 0 0 70px #fff, 0 0 110px #5ee7ff !important; transform: scale(1.05); }
+        .disabled-mic { opacity: 0.3; cursor: default !important; }
+        .mic-icon { font-size: 75px; color: #fff; }
+
+        .end-btn { 
+            margin-top: 20px; padding: 12px 35px; border-radius: 12px; background: #ef4743; 
+            color: white; border: none; cursor: pointer; display: none; font-weight: bold; 
+        }
+    </style>
+</head>
 <body>
 
-<header>
-  <div class="logo">
-    <span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I <span style="font-size: 14px; opacity: 0.7;">| Concept Round</span>
-  </div>
-</header>
+<header><div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div></header>
 
-<section class="tech-container">
-  <div id="currentTopic" style="color: #7bb7ff; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px;">PREPARING...</div>
-  
-  <div class="voice-circle initial-mic" id="micBtn">
-    <i class="fa-solid fa-microphone mic-icon"></i>
-  </div>
-  <p id="micStatus" style="margin-top: 15px; color: #5ee7ff; font-weight: 500; height: 20px;">Click Start to begin the Concept Round</p>
+<div class="tech-container">
+    <div class="subject-group" id="selector">
+        <button class="sub-btn" onclick="startConcept('OOPS')">OOPS</button>
+        <button class="sub-btn" onclick="startConcept('DBMS')">DBMS</button>
+        <button class="sub-btn" onclick="startConcept('Operating Systems')">OS</button>
+        <button class="sub-btn" onclick="startConcept('Computer Networks')">CN</button>
+    </div>
 
-  <button class="start-btn" id="startBtn">Start Interview</button>
+    <button class="end-btn" id="endBtn">End Discussion</button>
 
-  <div class="interview-layout" id="interviewLayout" style="display: grid; opacity: 0;">
-    <div class="chat-column ai-column" id="aiChat"></div>
-    <div class="center-column">
+    <div class="interview-layout" id="interviewLayout">
+        <div class="chat-column" id="aiChat"></div>
+        <div class="center-area">
+            <div class="voice-circle disabled-mic" id="micBtn"><i class="fa-solid fa-microphone mic-icon"></i></div>
+            <p id="micStatus" style="margin-top: 20px; color: #5ee7ff; font-weight: 500;">Select a Topic</p>
         </div>
-    <div class="chat-column user-column" id="userChat"></div>
-  </div>
-</section>
+        <div class="chat-column" id="userChat"></div>
+    </div>
+</div>
 
-<script src="concepts.js"></script>
+<script>
+    const aiChat = document.getElementById("aiChat"), userChat = document.getElementById("userChat");
+    const micBtn = document.getElementById("micBtn"), micStatus = document.getElementById("micStatus");
+    const studentName = localStorage.getItem("studentName") || "Narendra";
+    let conversationHistory = []; // Starts fresh
+    let canUseMic = false;
+    let currentSubject = "";
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-IN";
+    recognition.continuous = true; 
+
+    function startConcept(subject) {
+        currentSubject = subject;
+        document.getElementById("selector").style.display = "none";
+        document.getElementById("endBtn").style.display = "block";
+        document.getElementById("interviewLayout").style.display = "grid";
+        
+        // Initial AI prompt: Strictly asking for explanation first
+        handleAIStep(`Hello ${studentName}. Let's begin the interview on ${subject}. Please tell me your understanding of ${subject}. What is its primary purpose?`);
+    }
+
+    // RECTIFIED: Complete Reset Logic
+    document.getElementById("endBtn").onclick = () => {
+        window.speechSynthesis.cancel(); // 1. Stop AI voice immediately
+        try { recognition.stop(); } catch(e) {} // 2. Stop mic listener
+        
+        conversationHistory = []; // 3. Clear data
+        location.reload(); // 4. Hard reset page
+    };
+
+    async function handleAIStep(prompt) {
+        canUseMic = false;
+        micBtn.classList.add("disabled-mic");
+        micStatus.innerText = "Interviewer is speaking...";
+
+        try {
+            const res = await fetch('http://localhost:5000/api/technical/analyze-concept', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: prompt, history: conversationHistory, studentName, subject: currentSubject })
+            });
+            const data = await res.json();
+            conversationHistory.push({ role: "assistant", content: data.feedback });
+            renderMessage("ai", data.feedback);
+            speakAI(data.feedback);
+        } catch (e) { micStatus.innerText = "Check Server Connection"; }
+    }
+
+    function speakAI(text) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.onend = () => { 
+            canUseMic = true; 
+            micBtn.classList.remove("disabled-mic"); 
+            micStatus.innerText = "Click mic to explain"; // Centered under mic
+        };
+        window.speechSynthesis.speak(utter);
+    }
+
+    let transcript = "";
+    micBtn.onclick = () => {
+        if (!canUseMic) return;
+        if (micBtn.classList.contains("active-mic")) {
+            recognition.stop();
+        } else {
+            transcript = "";
+            recognition.start();
+            micBtn.classList.add("active-mic");
+            micStatus.innerText = "Listening... Click to finish.";
+        }
+    };
+
+    recognition.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) transcript += event.results[i][0].transcript;
+        }
+    };
+
+    recognition.onend = () => {
+        micBtn.classList.remove("active-mic");
+        if (transcript.trim().length > 0) {
+            renderMessage("user", transcript);
+            conversationHistory.push({ role: "user", content: transcript });
+            handleAIStep(transcript);
+        }
+    };
+
+    function renderMessage(type, text) {
+        const panel = type === "ai" ? aiChat : userChat;
+        const div = document.createElement("div");
+        div.className = `msg ${type}-msg`;
+        div.innerHTML = `<b>${type === 'ai' ? 'Interviewer' : 'You'}:</b><br>${text}`;
+        panel.appendChild(div);
+        panel.scrollTop = panel.scrollHeight;
+    }
+</script>
 </body>
 </html>

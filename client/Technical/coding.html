@@ -2,84 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CareerSync AI | Two Sum</title>
+    <title>CareerSync AI | Dynamic Interview</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="technical.css">
     <style>
-        body { background-color: #1a1a1a; color: #eff1f6; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
-        .coding-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: calc(100vh - 65px); padding: 12px; margin-top: 50px; box-sizing: border-box; }
-        .problem-sidebar { background: #282828; border-radius: 8px; padding: 20px; overflow-y: auto; font-size: 14px; border: 1px solid #333; }
-        .example-box { background: #333; padding: 12px; border-radius: 8px; margin: 12px 0; font-family: 'Menlo', monospace; font-size: 13px; border-left: 4px solid #5ee7ff; }
-        .right-panel { display: flex; flex-direction: column; gap: 8px; position: relative; }
-        #editor-container { flex-grow: 1; border-radius: 0 0 8px 8px; border: 1px solid #333; overflow: hidden; background: #1e1e1e; }
-        
-        /* Fixed Dropdown Theme */
-        .editor-header { background: #333; padding: 8px 15px; border-radius: 8px 8px 0 0; display: flex; align-items: center; border: 1px solid #333; border-bottom: none; }
-        #langSelect { background: #333; color: #fff; border: none; font-size: 13px; outline: none; cursor: pointer; }
-        #langSelect option { background: #1e1e1e; color: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
+        body { background: #191b2a; color: white; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        header { position: absolute; top: 20px; left: 30px; z-index: 100; }
+        .logo { font-size: 26px; font-weight: 600; }
+        .grad { background: linear-gradient(90deg,#5ee7ff,#7bb7ff,#fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .action-bar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 5px 0; }
-        .btn { padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; font-weight: 600; transition: 0.2s; }
-        .btn-run { background: #3e3e3e; color: #fff; }
-        .btn-submit { background: #2cbb5d; color: #fff; }
-        .mic-btn-circle { width: 36px; height: 36px; border-radius: 50%; background: #282828; display: flex; align-items: center; justify-content: center; color: #5ee7ff; border: 1px solid #5ee7ff; cursor: pointer; }
+        .tech-container { width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 60px; }
+        .interview-layout { display: none; width: 100%; grid-template-columns: 1fr 320px 1fr; gap: 25px; align-items: center; padding: 0 40px; }
 
-        /* Console */
-        .console-panel { background: #282828; border-radius: 8px; height: 160px; display: flex; flex-direction: column; border: 1px solid #333; }
-        #consoleOutput { padding: 15px; font-family: 'Menlo', monospace; font-size: 13px; color: #fff; overflow-y: auto; }
-        .running-text { color: #5ee7ff; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        /* Hidden Scrollbars */
+        .chat-column { 
+            height: 550px; overflow-y: scroll; display: flex; flex-direction: column; gap: 15px; padding: 10px; 
+            scrollbar-width: none; -ms-overflow-style: none; 
+        }
+        .chat-column::-webkit-scrollbar { display: none; }
 
-        /* Victory Overlay */
-        #victoryOverlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26, 26, 26, 0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; }
-        .tick-mark { font-size: 60px; color: #2cbb5d; margin-bottom: 20px; }
+        .msg { max-width: 90%; padding: 14px 18px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+        .ai-msg { background: #263556; border: 1px solid rgba(94,231,255,0.3); align-self: flex-start; }
+        .user-msg { background: #1b233f; border: 1px solid rgba(123,183,255,0.3); align-self: flex-end; }
+
+        .center-area { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .voice-circle {
+            width: 220px; height: 220px; border-radius: 50%; border: 6px solid white;
+            box-shadow: 0 0 25px #fff, 0 0 50px #5ee7ff; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; background: rgba(38, 53, 86, 0.6); transition: 0.4s;
+        }
+        .active-mic { box-shadow: 0 0 60px #fff, 0 0 100px #5ee7ff !important; transform: scale(1.05); }
+        .disabled-mic { opacity: 0.3; cursor: default !important; }
+        .mic-icon { font-size: 75px; color: #fff; }
+
+        .btn-group { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .end-btn { padding: 12px 35px; border-radius: 12px; background: #ef4743; color: white; border: none; font-weight: 700; cursor: pointer; display: none; transition: 0.3s; }
+        .end-btn:hover { background: #c0392b; }
+        .start-btn { padding: 16px 45px; border-radius: 15px; background: #263556; color: white; border: 1px solid #5ee7ff; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
-    <header style="padding: 12px 25px; position: fixed; top: 0; width: 100%; background: #1a1a1a; z-index: 1000; border-bottom: 1px solid #333;">
-        <div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div>
-    </header>
 
-    <div class="coding-container">
-        <div class="problem-sidebar">
-            <h2>1. Two Sum</h2>
-            <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return <i>indices of the two numbers such that they add up to <code>target</code></i>.</p>
-            <div class="example-box"><b>Example 1:</b><br>Input: nums = [2,7,11,15], target = 9<br>Output: [0,1]</div>
-            <div class="example-box"><b>Example 2:</b><br>Input: nums = [3,2,4], target = 6<br>Output: [1,2]</div>
-            <div class="example-box"><b>Example 3:</b><br>Input: nums = [3,3], target = 6<br>Output: [0,1]</div>
-            <div id="aiChat" style="margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; color: #5ee7ff; font-style: italic;"></div>
-        </div>
+<header><div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div></header>
 
-        <div class="right-panel">
-            <div id="victoryOverlay">
-                <i class="fa-solid fa-circle-check tick-mark"></i>
-                <div style="color: #2cbb5d; font-size: 24px; font-weight: bold;">Successfully Submitted!</div>
-                <button class="btn btn-run" style="margin-top: 20px;" onclick="document.getElementById('victoryOverlay').style.display='none'">Back to Code</button>
-            </div>
-
-            <div class="editor-header">
-                <select id="langSelect" onchange="changeLanguage()">
-                    <option value="javascript">JavaScript</option>
-                    <option value="python">Python</option>
-                    <option value="java">Java</option>
-                    <option value="cpp">C++</option>
-                </select>
-            </div>
-            <div id="editor-container"></div>
-            
-            <div class="action-bar">
-                <div class="mic-btn-circle" id="micBtn"><i class="fa-solid fa-microphone"></i></div>
-                <button class="btn btn-run" onclick="runLogic(false)">Run</button>
-                <button class="btn btn-submit" onclick="runLogic(true)">Submit</button>
-            </div>
-
-            <div class="console-panel">
-                <div id="consoleOutput">> Click "Run" to validate your solution.</div>
-            </div>
-        </div>
+<div class="tech-container">
+    <div class="btn-group">
+        <button class="start-btn" id="startBtn">Start Fresh Session</button>
+        <button class="end-btn" id="endBtn">End Session</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
-    <script src="coding.js"></script>
+    <div class="interview-layout" id="interviewLayout">
+        <div class="chat-column" id="aiChat"></div>
+        <div class="center-area">
+            <div class="voice-circle disabled-mic" id="micBtn"><i class="fa-solid fa-microphone mic-icon"></i></div>
+            <p id="micStatus" style="margin-top: 20px; color: #5ee7ff; font-weight: 500;">Ready</p>
+        </div>
+        <div class="chat-column" id="userChat"></div>
+    </div>
+</div>
+
+<script>
+    const startBtn = document.getElementById("startBtn"), endBtn = document.getElementById("endBtn");
+    const aiChat = document.getElementById("aiChat"), userChat = document.getElementById("userChat");
+    const micBtn = document.getElementById("micBtn"), micStatus = document.getElementById("micStatus");
+
+    let studentName = localStorage.getItem("studentName") || "Narendra";
+    let conversationHistory = []; 
+    let canUseMic = false;
+
+    // Problems for random selection
+    const problems = [
+        { title: "Two Sum", desc: "Find two numbers in an array that sum to a specific target.", example: "Input: [2,7,11,15], Target: 9 -> Output: [0,1]" },
+        { title: "Valid Parentheses", desc: "Determine if the input string containing brackets is valid.", example: "Input: '()[]{}' -> Output: true" },
+        { title: "Palindrome Number", desc: "Check if an integer is a palindrome.", example: "Input: 121 -> Output: true" }
+    ];
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-IN";
+    recognition.continuous = true;
+
+    startBtn.onclick = () => {
+        // Clear everything to ensure a fresh session
+        aiChat.innerHTML = ""; userChat.innerHTML = ""; conversationHistory = [];
+        startBtn.style.display = "none"; endBtn.style.display = "block";
+        document.getElementById("interviewLayout").style.display = "grid";
+        
+        const prob = problems[Math.floor(Math.random() * problems.length)];
+        const intro = `Hello ${studentName}. I have a challenge for you: ${prob.title}. ${prob.desc}. Example: ${prob.example}. How would you approach this?`;
+        
+        handleAIStep(intro);
+    };
+
+    // RECTIFIED: Complete Reset Logic
+    endBtn.onclick = () => {
+        window.speechSynthesis.cancel(); // 1. Stop AI speaking immediately
+        try { recognition.stop(); } catch(e) {} // 2. Stop mic listener
+        
+        // 3. Clear data and reload for hard reset
+        conversationHistory = [];
+        alert("Session Ended. All session data has been cleared.");
+        location.reload(); 
+    };
+
+    async function handleAIStep(prompt) {
+        canUseMic = false;
+        micBtn.classList.add("disabled-mic");
+        micStatus.innerText = "Interviewer is speaking...";
+
+        try {
+            const res = await fetch('http://localhost:5000/api/technical/analyze-thought', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: prompt, history: conversationHistory, studentName })
+            });
+            const data = await res.json();
+            conversationHistory.push({ role: "assistant", content: data.feedback });
+            renderMessage("ai", data.feedback);
+            speakAI(data.feedback);
+        } catch (e) { micStatus.innerText = "Server Connection Error"; }
+    }
+
+    function speakAI(text) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.onend = () => { 
+            canUseMic = true; 
+            micBtn.classList.remove("disabled-mic"); 
+            micStatus.innerText = "Click mic to explain logic"; 
+        };
+        window.speechSynthesis.speak(utter);
+    }
+
+    let finalTranscript = "";
+    micBtn.onclick = () => {
+        if (!canUseMic) return;
+        if (micBtn.classList.contains("active-mic")) { 
+            recognition.stop(); 
+        } else { 
+            finalTranscript = ""; 
+            recognition.start(); 
+            micBtn.classList.add("active-mic"); 
+            micStatus.innerText = "Listening... Click to finish."; 
+        }
+    };
+
+    recognition.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+        }
+    };
+
+    recognition.onend = () => {
+        micBtn.classList.remove("active-mic");
+        if (finalTranscript.trim().length > 0) {
+            renderMessage("user", finalTranscript);
+            conversationHistory.push({ role: "user", content: finalTranscript });
+            handleAIStep(finalTranscript);
+        }
+    };
+
+    function renderMessage(type, text) {
+        const panel = type === "ai" ? aiChat : userChat;
+        const div = document.createElement("div");
+        div.className = `msg ${type}-msg`;
+        div.innerHTML = `<b>${type === "ai" ? "Interviewer" : "You"}:</b><br>${text}`;
+        panel.appendChild(div);
+        panel.scrollTop = panel.scrollHeight;
+    }
+</script>
 </body>
 </html>

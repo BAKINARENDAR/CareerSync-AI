@@ -1,46 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>CareerSync AI | Technical Concepts</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="technical.css">
-    <style>
-        .concepts-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: 80vh; margin-top: 70px; padding: 0 20px; }
-        .topic-list { background: #282828; border-radius: 8px; padding: 15px; border: 1px solid #333; }
-        .topic-item { padding: 12px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
-        .topic-item:hover { background: #333; border-color: #5ee7ff; }
-        .topic-item.active { background: #5ee7ff; color: #1a1a1a; font-weight: bold; }
-        .interview-box { background: #282828; border-radius: 8px; display: flex; flex-direction: column; padding: 30px; border: 1px solid #333; position: relative; }
-        .mic-section { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-    </style>
-</head>
+  <meta charset="UTF-8">
+  <title>CareerSync AI | Technical Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="technical.css"> </head>
 <body>
-    <header style="padding: 12px 25px; position: fixed; top: 0; width: 100%; background: #1a1a1a; z-index: 1000; border-bottom: 1px solid #333;">
-        <div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div>
-    </header>
 
-    <div class="concepts-grid">
-        <div class="topic-list">
-            <h3 style="color: #5ee7ff; margin-bottom: 20px;">Choose Topic</h3>
-            <div class="topic-item active" onclick="setTopic('OOPS')">OOPS Concepts</div>
-            <div class="topic-item" onclick="setTopic('OS')">Operating Systems</div>
-            <div class="topic-item" onclick="setTopic('DBMS')">Database Management</div>
-            <div class="topic-item" onclick="setTopic('CN')">Computer Networks</div>
+<header>
+  <div class="logo">
+    <span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I <span style="font-size: 14px; opacity: 0.7;">| Concept Round</span>
+  </div>
+</header>
+
+<section class="tech-container">
+  <div id="currentTopic" style="color: #7bb7ff; margin-bottom: 10px; font-weight: 600; letter-spacing: 1px;">PREPARING...</div>
+  
+  <div class="voice-circle initial-mic" id="micBtn">
+    <i class="fa-solid fa-microphone mic-icon"></i>
+  </div>
+  <p id="micStatus" style="margin-top: 15px; color: #5ee7ff; font-weight: 500; height: 20px;">Click Start to begin the Concept Round</p>
+
+  <button class="start-btn" id="startBtn">Start Interview</button>
+
+  <div class="interview-layout" id="interviewLayout" style="display: grid; opacity: 0;">
+    <div class="chat-column ai-column" id="aiChat"></div>
+    <div class="center-column">
         </div>
+    <div class="chat-column user-column" id="userChat"></div>
+  </div>
+</section>
 
-        <div class="interview-box">
-            <div id="aiChat" style="flex-grow: 1; overflow-y: auto;">
-                <div class="msg ai-msg"><b>CareerSync AI:</b> Select a topic on the left to start the conceptual interview.</div>
-            </div>
-
-            <div class="mic-section">
-                <div class="mic-btn-circle" id="micBtn" style="width: 60px; height: 60px;"><i class="fa-solid fa-microphone" style="font-size: 24px;"></i></div>
-                <div id="micStatus" style="color: #aaa; font-size: 14px;">Click the mic to answer</div>
-            </div>
-        </div>
-    </div>
-
-    <script src="concepts.js"></script>
+<script src="concepts.js"></script>
 </body>
 </html>

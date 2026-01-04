@@ -1,36 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const Groq = require('groq-sdk');
+
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-router.post('/analyze-code', async (req, res) => {
-    const { code, question, studentName } = req.body;
+router.post('/analyze-thought', async (req, res) => {
+    const { message, history, studentName } = req.body;
+
     try {
         const completion = await groq.chat.completions.create({
             messages: [
-                { role: "system", content: `You are CareerSync AI. Help ${studentName} solve 'Two Sum'. Analyze their code: ${code}. Answer their question: ${question}. Give hints only.` },
-                { role: "user", content: `Code: ${code}\nQuestion: ${question}` }
+                { 
+                    role: "system", 
+                    content: `You are a Senior Technical Interviewer. 
+                    STRICT RULES:
+                    1. NEVER explain the coding solution yourself.
+                    2. YOUR ROLE is ONLY to present the challenge and judge ${studentName}'s logic.
+                    3. Ask about Time and Space complexity (O notation) based on their answer.
+                    4. Keep your responses strictly under 3 sentences for easy listening.` 
+                },
+                ...history, 
+                { role: "user", content: message }
             ],
-            model: "llama3-8b-8192",
+            model: "llama-3.3-70b-versatile", 
+            temperature: 0.7
         });
         res.json({ feedback: completion.choices[0].message.content });
-    } catch (error) {
-        res.status(500).json({ feedback: "AI error. Try again." });
-    }
+    } catch (e) { res.status(500).json({ feedback: "I'm sorry, can you repeat that?" }); }
 });
-router.post('/evaluate-concept', async (req, res) => {
-    const { topic, answer, studentName } = req.body;
-    try {
-        const completion = await groq.chat.completions.create({
-            messages: [{
-                role: "system",
-                content: `You are a technical interviewer. The student ${studentName} is answering a question on ${topic}. 
-                Their answer is: "${answer}". 
-                Evaluate if it is correct. Provide a short verbal feedback and then ask the next follow-up question.`
-            }],
-            model: "llama3-8b-8192",
-        });
-        res.json({ feedback: completion.choices[0].message.content });
-    } catch (e) { res.status(500).json({ error: "AI error" }); }
-});
+
 module.exports = router;

@@ -4,7 +4,12 @@
   box-sizing: border-box;
   font-family: "Segoe UI", Arial, sans-serif;
 }
-
+.grad {
+  background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 body {
   height: 100vh;
   background-color: #191b2a;
@@ -20,24 +25,18 @@ header {
   left: 30px;
 }
 .logo {
-  font-family: 'Inter', sans-serif;
-  font-size: 26px; 
+  font-family: "Inter", sans-serif;
+  font-size: 26px;
   font-weight: 600;
   color: #ffffff;
   letter-spacing: 0.5px;
 }
 .grad {
-  background: linear-gradient(
-    90deg,
-    #5ee7ff,
-    #7bb7ff,
-    #ffffff
-  );
+  background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  text-shadow:
-    0 0 8px rgba(94, 231, 255, 0.6),
+  text-shadow: 0 0 8px rgba(94, 231, 255, 0.6),
     0 0 18px rgba(123, 183, 255, 0.4);
 }
 
@@ -47,22 +46,17 @@ header {
 }
 
 .index-title {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 32px;
   font-weight: 600;
   text-align: center;
   margin-bottom: 8px;
-  background: linear-gradient(
-    90deg,
-    #5ee7ff 0%,
-    #7bb7ff 50%,
-    #ffffff 100%
-  );
+  background: linear-gradient(90deg, #5ee7ff 0%, #7bb7ff 50%, #ffffff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .index-subtitle {
-  color:#898a9e;
+  color: #898a9e;
   font-size: 17px;
   margin-bottom: 30px;
 }
@@ -78,19 +72,20 @@ header {
   position: relative;
   background: transparent;
   border: 7px solid #ffffff;
-  box-shadow: 
-    0 0 15px #ffffff,
-    0 0 20px #5ee7ff,
-    0 0 40px #4a80ff,
-    inset 0 0 20px #5ee7ff; 
+  box-shadow: 0 0 15px #ffffff, 0 0 20px #5ee7ff, 0 0 40px #4a80ff,
+    inset 0 0 20px #5ee7ff;
 }
 .voice-circle::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 110%;
   height: 110%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(94, 231, 255, 0.1) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(94, 231, 255, 0.1) 0%,
+    transparent 70%
+  );
   z-index: -1;
 }
 .mic-icon {
@@ -103,9 +98,9 @@ header {
   display: inline-block;
 }
 .mic-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mic-icon:hover {
@@ -157,6 +152,6 @@ header {
   font-size: 18px;
   color: #9aa4b2;
 }
-.CareerSync:hover{
-    cursor: pointer;
+.CareerSync:hover {
+  cursor: pointer;
 }

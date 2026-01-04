@@ -6,7 +6,7 @@ body {
   background: radial-gradient(circle at top, #0b1229, #020617);
   color: #e5e7eb;
   font-family: Inter, sans-serif;
-  overflow: hidden;
+  overflow: auto;
 }
 
 
@@ -29,8 +29,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
+  gap: 18px;
+  padding: 80px 16px 40px; /* top padding avoids header overlap */
 }
 
 /* TEXT */
@@ -55,7 +55,7 @@ input {
   border-radius: 14px;
   border: 1px solid #1e293b;
   background: #020617;
-  color: white;
+  color: rgb(120, 122, 224);
 }
 
 /* BUTTON */
@@ -94,10 +94,12 @@ input {
 /* PARTICIPANTS */
 .participants-box {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
+  max-width: 90%;
 }
+
 
 .participant {
   padding: 10px 18px;
@@ -135,6 +137,36 @@ input {
   margin-top: 8px;
 }
 
+/* SCORES BOX */
+.scores-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #1e293b;
+  background: rgba(2, 6, 23, 0.65);
+  width: 320px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.scores-box p.label {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.score-item.active {
+  color: #22c55e;
+  font-weight: 600;
+}
+
 
 .stars {
   position: fixed;
@@ -147,32 +179,25 @@ input {
   pointer-events: none;   /* 🔥 THIS IS THE FIX */
   z-index: 0;
 }
-header {
-  position: absolute;
-  top: 20px;
-  left: 30px;
-}
-.logo {
-  font-family: 'Inter', sans-serif;
-  font-size: 26px; 
-  font-weight: 600;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-}
-.grad {
-  background: linear-gradient(
-    90deg,
-    #5ee7ff,
-    #7bb7ff,
-    #ffffff
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 
-  text-shadow:
-    0 0 8px rgba(94, 231, 255, 0.6),
-    0 0 18px rgba(123, 183, 255, 0.4);
-}
-.CareerSync:hover{
-    cursor: pointer;
+@media (max-width: 768px) {
+
+  .mic-circle {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+  }
+
+  .scores-box,
+  .answer-box {
+    width: 100%;
+  }
+
+  .participants-box {
+    max-width: 100%;
+  }
+
+  .module {
+    font-size: 18px;
+  }
 }

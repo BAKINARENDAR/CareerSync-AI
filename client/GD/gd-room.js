@@ -4,7 +4,7 @@ const participants = JSON.parse(localStorage.getItem("gdParticipants"));
 
 if (!topic || !participants || participants.length === 0) {
   alert("No GD data found. Please start from setup page.");
-  window.location.href = "/GD/setup.html";
+  window.location.href = "setup.html";
 }
 
 
@@ -90,10 +90,23 @@ mic.addEventListener("click", () => {
   currentSpeaker = null;
 });
 
-// UPDATE SCORES
 function updateScores() {
   scoresDiv.innerHTML = "";
-  for (let p in scores) {
-    scoresDiv.innerHTML += `<p>${p}: ${scores[p]} pts</p>`;
+
+  for (let name in scores) {
+    const row = document.createElement("div");
+    row.className = "score-item";
+
+    if (name === currentSpeaker) {
+      row.classList.add("active");
+    }
+
+    row.innerHTML = `
+      <span>${name}</span>
+      <span>${scores[name]} pts</span>
+    `;
+
+    scoresDiv.appendChild(row);
   }
 }
+

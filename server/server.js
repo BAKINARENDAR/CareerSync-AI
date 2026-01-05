@@ -9,13 +9,20 @@ app.use(cors());
 app.use(express.json());
 
 const routes = require('./routes');
-app.use('/api', routes);
+routes(app);
 
 
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'Groq Backend running!', 
     groqKeySet: !!process.env.GROQ_API_KEY 
+  });
+});
+
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'CareerSync AI Backend Deployed!',
+    endpoints: ['/api/health', '/api/analyze (POST)']
   });
 });
 

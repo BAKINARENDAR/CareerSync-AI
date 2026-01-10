@@ -234,7 +234,7 @@ function stopRecording() {
 
 async function sendTextToBackend(text, confidence) {
     try {
-        const response = await fetch('http://localhost:5000/api/analyze', {
+        const response = await fetch('https://careersync-backend-yo5x.onrender.com/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, confidence })

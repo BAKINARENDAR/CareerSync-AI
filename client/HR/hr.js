@@ -19,7 +19,13 @@ let timeLeft = 300;
 let timerInterval;
 let maxDuration = 300;
 
+// NEW: Session tracking
+let availableQuestions = [];
+let sessionScores = [];
+let totalAnswered = 0;
+
 function speakFinalFeedback(data) {
+    const avgScore = sessionScores.length > 0 ? (sessionScores.reduce((a,b)=>a+b,0)/sessionScores.length).toFixed(1) : data.overallScore;
     const speechText = `
         Your communication score is ${data.communicationScore} out of 10.
         ${data.communicationSkills}
@@ -29,7 +35,8 @@ function speakFinalFeedback(data) {
         
         Overall score ${data.overallScore} out of 10.
         
-        Next questions: ${data.followupQuestions.join('. ')}
+        Session average: ${avgScore} from ${totalAnswered} questions.
+        ${availableQuestions.length > 0 ? 'Next questions: ' + availableQuestions.join('. ') : 'Interview complete!'}
     `;
     
     const utterance = new SpeechSynthesisUtterance(speechText);
@@ -49,6 +56,47 @@ function autoSpeakFeedback(data) {
     setTimeout(() => {
         speakFinalFeedback(data);
     }, 2000); 
+}
+
+// NEW: Follow-up button functions
+function showFollowupButtons() {
+    const container = document.getElementById('buttonContainer');
+    const followupDiv = document.getElementById('followupButtons');
+    
+    if (availableQuestions.length === 0) {
+        followupDiv.style.display = 'none';
+        return;
+    }
+    
+    container.innerHTML = availableQuestions.map((q, i) => 
+        `<button onclick="setCurrentQuestion('${q.replace(/'/g,"\\'").replace(/"/g,'\\"')}', ${i})" >
+            ${q}
+        </button>`
+    ).join('');
+    
+    followupDiv.style.display = 'block';
+}
+
+function setCurrentQuestion(question) {
+    document.getElementById('currentQuestion').textContent = question;
+    document.getElementById('transcriptText').textContent = '';
+    document.getElementById('summaryMetricsBox').style.display = 'none';
+    document.getElementById('statusText').textContent = 'Click mic to answer this question...';
+    document.getElementById('followupButtons').style.display = 'none';
+}
+
+function endSession() {
+    const finalAvg = sessionScores.length > 0 ? (sessionScores.reduce((a,b)=>a+b,0)/sessionScores.length).toFixed(1) : 'N/A';
+    document.getElementById('statusText').innerHTML = `
+        <div style="text-align:center;">
+            <h2 style="color:#4caf50;">🎉 Interview Complete!</h2>
+            <h3>Final Average: ${finalAvg}/10 (${totalAnswered} questions answered)</h3>
+            <button onclick="location.reload()" style="padding:12px 24px; background:#64b5f6; color:white; border:none; border-radius:8px; cursor:pointer; font-size:16px; margin-top:15px;">
+                🔄 New Interview
+            </button>
+        </div>
+    `;
+    speakFinalFeedback({ overallScore: finalAvg, followupQuestions: [] });
 }
 
 function initSpeechRecognition() {
@@ -78,6 +126,13 @@ function initSpeechRecognition() {
         summaryBox.style.display = 'none';
         isRecording = true;
         timeLeft = maxDuration;
+        
+        // NEW: Reset session on fresh start
+        if (totalAnswered === 0) {
+            sessionScores = [];
+            availableQuestions = [];
+            document.getElementById('followupButtons').style.display = 'none';
+        }
         
         statusText.textContent = '🎙️ Listening... speak your answer (5 mins max)';
         recordingStatus.style.display = 'flex';
@@ -206,6 +261,12 @@ function displayFeedback(data) {
 
     recordingIndicator.style.display = 'none';
 
+    // NEW: Track session
+    sessionScores.push(data.overallScore);
+    totalAnswered++;
+
+    const avgScore = sessionScores.reduce((a,b)=>a+b,0)/sessionScores.length;
+
     const feedbackHTML = `
         <div style="margin-top: 20px;">
             <h3 style="color: #81c784; margin-bottom: 15px;">📊 Your Feedback</h3>
@@ -222,29 +283,24 @@ function displayFeedback(data) {
                 <p style="margin-top: 8px; color: #64b5f6;">Score: ${data.confidenceScore || 6.5}/10</p>
             </div>
 
-            <div style="background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.4); padding: 15px; border-radius: 10px;">
-                <p style="color: #ffb74d; font-weight: 600; margin-bottom: 8px;">🎯 Follow-up Questions</p>
-                <ol style="color: #b0bec5; margin-left: 20px;">
-                    ${
-                        data.followupQuestions
-                            ? data.followupQuestions
-                                .map(q => `<li style="margin-bottom: 8px;">${q}</li>`)
-                                .join('')
-                            : '<li>What was your biggest challenge?</li><li>How did you handle conflicts?</li>'
-                    }
-                </ol>
+            <div style="background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.4); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <p style="color: #ffb74d; font-weight: 600; margin-bottom: 8px;">Structure</p>
+                <p style="color: #b0bec5;">${data.structureFeedback || 'Good organization.'}</p>
+                <p style="margin-top: 8px; color: #64b5f6;">Score: ${data.structureScore || 7.0}/10</p>
             </div>
 
             <div style="text-align: center; margin-top: 20px;">
                 <h4 style="color: #4caf50; margin-bottom: 10px;">Overall: ${data.overallScore || 7.0}/10</h4>
-                <button onclick="location.reload()" style="padding: 10px 20px; background: #64b5f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                    🎤 Try Again
-                </button>
+                <p style="color: #b0bec5; font-size: 14px;">Session Avg: ${avgScore.toFixed(1)} (${totalAnswered} answered)</p>
             </div>
         </div>
     `;
 
     statusElement.innerHTML = feedbackHTML;
+    
+    // NEW: Show follow-up buttons
+    availableQuestions = data.followupQuestions || [];
+    showFollowupButtons();
     
     autoSpeakFeedback(data);
 }

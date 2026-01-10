@@ -13,6 +13,7 @@ body {
     justify-content: center;
     align-items: center;
     overflow-x: hidden;
+    margin: 50px;
 }
 
 .stars {
@@ -172,3 +173,72 @@ header {
 .CareerSync:hover{
     cursor: pointer;
 }
+/* ✨ Cosmic Theme Follow-up Buttons */
+#followupButtons {
+    background: linear-gradient(145deg, rgba(10,14,39,0.95), rgba(26,31,58,0.9));
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 30px;
+    border: 1px solid rgba(100,181,246,0.4);
+    box-shadow: 0 12px 45px rgba(10,14,39,0.8), 0 0 30px rgba(100,181,246,0.2);
+    margin: 30px auto;
+    max-width: 650px;
+    text-align: center;  /* ← THIS FIXES LEFT ALIGN */
+}
+
+
+#followupButtons h4 {
+    color: #64b5f6 !important;
+    text-align: center;
+    margin-bottom: 25px;
+    text-shadow: 0 0 15px rgba(100,181,246,0.6);
+}
+
+/* Main buttons - Blue Nebula Gradient */
+.followup-btn, #buttonContainer button {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #64b5f6 100%) !important;
+    border: 2px solid rgba(100,181,246,0.3) !important;
+    color: white !important;
+    padding: 16px 28px !important;
+    margin: 15px 12px !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    transition: 0.5s ease;
+    width: 90%;
+    box-shadow: 0 8px 25px rgba(100,181,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+
+.followup-btn:hover, #buttonContainer button:hover {
+    background: linear-gradient(135deg, #64b5f6 0%, #2a5298 50%, #1e3c72 100%) !important;
+    box-shadow: 0 15px 35px rgba(100,181,246,0.5), 0 0 20px rgba(100,181,246,0.3) !important;
+    transform: translateY(-4px) !important;
+}
+
+/* End Interview - Gold/Orange Glow */
+#endInterview {
+    background: linear-gradient(135deg, #ff4d4d 0%, #e40101 50%, #c50101 100%) !important;
+    border: 2px solid rgba(255,183,77,0.4) !important;
+    transition: 0.5s ease;
+    box-shadow: 0 8px 25px rgba(255,183,77,0.4), 0 0 20px rgba(255,183,77,0.2) !important;
+}
+
+/* Random - Cyan Accent */
+#randomQuestion {
+    background: linear-gradient(135deg, #00bcd4 0%, #4fc3f7 100%) !important;
+    border: 2px solid rgba(100,181,246,0.4) !important;
+    box-shadow: 0 8px 25px rgba(0,188,212,0.4) !important;
+    padding: 12px 22px !important;
+    font-size: 13px !important;
+}
+
+#endInterview:hover, #randomQuestion:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 15px 35px rgba(255,183,77,0.6) !important;
+}
+
+/* Varied Sizes */
+.followup-btn:nth-child(1), #buttonContainer button:nth-child(1) { min-width: 135px; }
+.followup-btn:nth-child(2), #buttonContainer button:nth-child(2) { min-width: 160px; }
+.followup-btn:nth-child(3), #buttonContainer button:nth-child(3) { min-width: 145px; }

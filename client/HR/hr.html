@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareerSync - HR Mic</title>
     <link rel="icon" href="favicon.png" type="image/png">
-  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../images/favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../images/favicon.png">
     <link rel="stylesheet" href="hr.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -24,18 +24,14 @@
         .status-text {
             z-index: 1;
         }
-        
     </style>
     <script defer src="hr.js"></script>
 </head>
 <header class="CareerSync" onclick="window.location.href='../index.html'">
     <div class="logo">
-   <span class="grad">C</span>areer<span class="grad">S</span>ync
-  <span class="grad">A</span>I
-</div>
-
-</div>
-
+        <span class="grad">C</span>areer<span class="grad">S</span>ync
+        <span class="grad">A</span>I
+    </div>
 </header>
 <body>
     <div class="stars" id="starContainer"></div>
@@ -61,6 +57,15 @@
             <h4>Current Question:</h4>
             <p id="currentQuestion">Tell me about yourself.</p>
         </div>
+
+        <!-- NEW: Follow-up Buttons Section -->
+        <center><div id="followupButtons" style="display:none; margin:20px 0; text-align:center;">
+            <h4 style="color:#ffb74d;">Choose Follow-up:</h4>
+            <div id="buttonContainer" style="max-width: 500px; margin: 0 auto;"></div>
+            <button id="endInterview" onclick="endSession()" style="margin-top:15px; padding:10px 20px; background:#f44336; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                End Interview
+            </button>
+        </div></center>
 
         <div id="transcriptBox" style="margin-top: 20px; text-align:left; max-width:600px; margin-inline:auto;">
             <h4>Recognized Answer:</h4>

@@ -24,6 +24,9 @@ let availableQuestions = [];
 let sessionScores = [];
 let totalAnswered = 0;
 
+// NEW: Prevent multiple sends
+let hasSent = false;
+
 function speakFinalFeedback(data) {
     const avgScore = sessionScores.length > 0 ? (sessionScores.reduce((a,b)=>a+b,0)/sessionScores.length).toFixed(1) : data.overallScore;
     const speechText = `
@@ -126,6 +129,7 @@ function initSpeechRecognition() {
         summaryBox.style.display = 'none';
         isRecording = true;
         timeLeft = maxDuration;
+        hasSent = false; // reset send flag
         
         // NEW: Reset session on fresh start
         if (totalAnswered === 0) {
@@ -162,13 +166,6 @@ function initSpeechRecognition() {
     recognition.onend = () => {
         recordingStatus.style.display = 'none';
         timerDisplay.style.display = 'none';
-        
-        if (isRecording && timeLeft > 0) {
-            setTimeout(() => recognition.start(), 100);
-        } else if (!finalTranscript) {
-            statusText.textContent = 'No speech detected. Click the mic and try again.';
-        }
-        
         isRecording = false;
     };
 
@@ -191,7 +188,8 @@ function initSpeechRecognition() {
         const lastResult = event.results[event.results.length - 1];
         const confidence = lastResult[0].confidence || 0;
 
-        if (finalTranscript.trim().length > 0 && lastResult.isFinal) {
+        if (finalTranscript.trim().length > 0 && lastResult.isFinal && !hasSent) {
+            hasSent = true; // mark as sent
             statusText.textContent = '⏳ Processing your response...';
             
             const wordCount = finalTranscript.trim().split(/\s+/).length;
@@ -213,6 +211,7 @@ function toggleRecording() {
     }
 
     if (!isRecording) {
+        hasSent = false; // reset for new recording
         isRecording = true;
         statusText.textContent = '🎙️ Listening... Click STOP when finished';
         recognition.start();
@@ -235,7 +234,7 @@ function stopRecording() {
 
 async function sendTextToBackend(text, confidence) {
     try {
-        const response = await fetch('https://careersync-backend-yo5x.onrender.com/api/analyze', {
+        const response = await fetch('http://localhost:5000/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, confidence })

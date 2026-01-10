@@ -239,10 +239,22 @@ function stopRecording() {
 
 async function sendTextToBackend(text, confidence) {
     try {
+        // Get company/job/jobDescription
+        const companyContext = JSON.parse(sessionStorage.getItem('companyContext') || '{}');
+        const company = companyContext.company || '';
+        const job = companyContext.job || '';
+        const jobDescription = companyContext.desc || '';
+
         const response = await fetch('https://careersync-backend-yo5x.onrender.com/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, confidence })
+            body: JSON.stringify({ 
+                text, 
+                confidence,
+                company,
+                job,
+                jobDescription
+            })
         });
 
         const data = await response.json();
@@ -251,6 +263,7 @@ async function sendTextToBackend(text, confidence) {
             displayFeedback(data);
         } else {
             document.getElementById('statusText').textContent = '❌ Error processing response.';
+            console.error(data);
         }
     } catch (error) {
         console.error('Error sending text:', error);

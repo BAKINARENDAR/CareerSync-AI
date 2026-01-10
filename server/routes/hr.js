@@ -4,7 +4,8 @@ const router = express.Router();
 
 router.post('/analyze', async (req, res) => {
   try {
-    const { text, confidence } = req.body;
+    const { text, confidence, company, job, jobDescription } = req.body;
+
     if (!text || !text.trim()) {
       return res.status(400).json({ 
         success: false, 
@@ -14,15 +15,20 @@ router.post('/analyze', async (req, res) => {
 
     const responseText = text.trim();
 
-    const prompt = `You are an experienced HR interviewer evaluating a candidate's spoken answer.
+    // ✅ Updated prompt to include company/job/jobDescription context
+    const prompt = `You are an experienced HR interviewer evaluating a candidate's spoken answer for a specific company and role.
+
+Company: "${company || 'Unknown Company'}"
+Job Title: "${job || 'Unknown Role'}"
+Job Description: "${jobDescription || 'No description provided'}"
 
 Candidate's answer: "${responseText}"
 
 Evaluate on 3 dimensions (communication, confidence, structure). Each gets:
-- Score 0-10 (decimal OK) 
+- Score 0-10 (decimal OK)
 - 1-2 sentence feedback
 
-Generate exactly 3 realistic HR follow-up questions.
+Generate exactly 3 realistic HR follow-up questions **based on candidate's spoken answer**.
 
 Respond ONLY with valid JSON, no other text:
 

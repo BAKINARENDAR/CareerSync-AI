@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerSync - Job Role Setup</title>
+    <link rel="stylesheet" href="hr.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="stars" id="starContainer"></div>
+    
+    <!-- ✅ Header FIXED inside body -->
+    <header class="CareerSync" onclick="window.location.href='../index.html'">
+        <div class="logo">
+            <span class="grad">C</span>areer<span class="grad">S</span>ync
+            <span class="grad">A</span>I
+        </div>
+    </header>
+
+    <div class="container" style="max-width: 550px;">
+        <h3 style="margin-bottom: 30px;">HR Interview Setup</h3>
+        
+        <div style="background: rgba(10,14,39,0.8); padding: 30px; border-radius: 20px; border: 1px solid #64b5f6;">
+            <input id="companyName" placeholder="Company (Google, Amazon, Microsoft)" 
+                   style="width:100%; padding:18px; margin:12px 0; border-radius:12px; border:1px solid #64b5f6; background:rgba(255,255,255,0.1); color:white; font-size:16px;">
+            
+            <input id="jobTitle" placeholder="Job Title (Software Engineer, Product Manager)" 
+                   style="width:100%; padding:18px; margin:12px 0; border-radius:12px; border:1px solid #64b5f6; background:rgba(255,255,255,0.1); color:white; font-size:16px;">
+            
+            <textarea id="jobDescription" placeholder="Paste Job Description or Requirements..." 
+                      style="width:100%; height:140px; padding:18px; margin:12px 0; border-radius:12px; border:1px solid #64b5f6; background:rgba(255,255,255,0.1); color:white; font-size:16px; resize:vertical;"></textarea>
+            
+            <button onclick="startCompanyInterview()" 
+                    style="width:100%; padding:20px; background:linear-gradient(135deg,#64b5f6,#1e3c72); color:white; border:none; border-radius:12px; font-size:18px; font-weight:600; cursor:pointer; margin-top:15px; box-shadow:0 8px 25px rgba(100,181,246,0.4);">
+                Start Company Interview
+            </button>
+        </div>
+        
+        <p style="color:#b0bec5; margin-top:20px; font-size:14px;">Powered by Groq AI</p>
+    </div>
+
+    <script>
+        function createStars() {
+            const container = document.getElementById('starContainer');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        function startCompanyInterview() {
+            const company = document.getElementById('companyName').value.trim();
+            const job = document.getElementById('jobTitle').value.trim();
+            const desc = document.getElementById('jobDescription').value.trim();
+            
+            if (!company || !job || !desc) {
+                alert('Please fill all 3 fields');
+                return;
+            }
+            
+            sessionStorage.setItem('companyContext', JSON.stringify({company, job, desc}));
+            window.location.href = 'hr.html';
+        }
+    </script>
+</body>
+</html>

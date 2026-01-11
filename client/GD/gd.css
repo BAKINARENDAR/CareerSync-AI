@@ -201,3 +201,64 @@ input {
     font-size: 18px;
   }
 }
+/* ===============================
+   RESPONSIVE LAYOUT
+================================ */
+
+/* Mobile screens */
+@media (max-width: 600px) {
+
+  .center {
+    padding: 20px 10px;
+  }
+
+  .form-box {
+    width: 100%;
+  }
+
+  .participants-box {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .participant {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .scores-box {
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .mic-circle {
+    width: 120px;
+    height: 120px;
+    font-size: 40px;
+  }
+
+}
+
+/* Tablets */
+@media (max-width: 900px) {
+  .form-box {
+    width: 90%;
+  }
+
+  .scores-box {
+    width: 90%;
+  }
+}
+
+/* Big screens */
+@media (min-width: 1200px) {
+  .center {
+    max-width: 1000px;
+    margin: auto;
+  }
+
+  .scores-box {
+    max-height: 300px;
+  }
+}

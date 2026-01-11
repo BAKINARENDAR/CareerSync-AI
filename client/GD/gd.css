@@ -14,10 +14,11 @@ body {
 
 /* HEADER */
 .top {
-  position: absolute;
-  top: 20px;
-  left: 30px;
+  width: 100%;
+  padding: 16px 20px;
+  box-sizing: border-box;
 }
+
 
 .top span {
   color: #38bdf8;
@@ -26,12 +27,14 @@ body {
 /* CENTER */
 .center {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 18px;
-  padding: 80px 16px 40px; /* top padding avoids header overlap */
+  padding: 30px 16px;
+  box-sizing: border-box;
 }
+
 
 /* TEXT */
 .module {
@@ -206,7 +209,7 @@ input {
 ================================ */
 
 /* Mobile screens */
-@media (max-width: 600px) {
+
 
   .center {
     padding: 20px 10px;
@@ -216,29 +219,6 @@ input {
     width: 100%;
   }
 
-  .participants-box {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .participant {
-    font-size: 14px;
-    padding: 6px 10px;
-  }
-
-  .scores-box {
-    width: 100%;
-    max-height: 200px;
-  }
-
-  .mic-circle {
-    width: 120px;
-    height: 120px;
-    font-size: 40px;
-  }
-
-}
 
 /* Tablets */
 @media (max-width: 900px) {
@@ -251,6 +231,13 @@ input {
   }
 }
 
+@media (min-width: 900px) {
+  .center {
+    align-items: center;
+  }
+}
+
+
 /* Big screens */
 @media (min-width: 1200px) {
   .center {
@@ -261,4 +248,68 @@ input {
   .scores-box {
     max-height: 300px;
   }
+}
+/* mobile */
+@media (max-width: 600px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .top {
+    text-align: center;
+  }
+
+  .module {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .mic-circle {
+    width: 100px;
+    height: 100px;
+    font-size: 36px;
+    margin: 0 auto;
+  }
+
+  .participants-box {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .answer-box,
+  .scores-box,
+  .form-box {
+    width: 100%;
+  }
+
+  input {
+    width: 100%;
+  }
+
+}
+
+@media (min-width: 900px) {
+  .center {
+    align-items: center;
+  }
+
+  .form-box,
+  .answer-box,
+  .scores-box {
+    width: 380px;
+  }
+
+  .participants-box {
+    max-width: 600px;
+  }
+}
+.mic-circle {
+  margin: 0 auto;
+}
+
+.module,
+.label,
+#topicText {
+  text-align: center;
 }

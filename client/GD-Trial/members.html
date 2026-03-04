@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GD Room</title>
+    <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+        }
+
+        /* ===== Timer Section ===== */
+        .timer-bar {
+            padding: 10px;
+            background: #111827;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #timer {
+            font-size: 20px;
+            font-weight: bold;
+            color: #22d3ee;
+        }
+
+        button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #22d3ee;
+            color: black;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #06b6d4;
+        }
+
+        /* ===== Topic Bar ===== */
+        .topic-bar {
+            background: #1e293b;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+        }
+
+        /* ===== Members Grid ===== */
+        .members-container {
+            display: grid;
+            gap: 20px;
+            padding: 30px;
+            justify-content: center;
+        }
+
+        /* Dynamic grid layouts */
+        .one { grid-template-columns: 200px; }
+        .two { grid-template-columns: 200px 200px; }
+        .three { grid-template-columns: 200px 200px; }
+        .four { grid-template-columns: 200px 200px; }
+
+        .member-box {
+            width: 200px;
+            height: 150px;
+            background: #1e293b;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .speaking {
+            border: 2px solid #22d3ee;
+            box-shadow: 0 0 15px #22d3ee;
+        }
+
+        .email {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            font-size: 13px;
+            color: #22d3ee;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- ===== Timer Section ===== -->
+<div class="timer-bar">
+    <span id="timer">00:00</span>
+    <button onclick="startTimer()">Start Timer</button>
+    <button onclick="endSession()">End Session</button>
+</div>
+
+<!-- ===== Topic ===== -->
+<div class="topic-bar" id="topic">
+    Topic: Loading...
+</div>
+
+<!-- ===== Members ===== -->
+<div id="members" class="members-container"></div>
+
+
+<script>
+const socket = io("http://localhost:5000");
+
+const urlParams = new URLSearchParams(window.location.search);
+const roomId = urlParams.get("room");
+const email = urlParams.get("email");
+
+let timerInterval;
+let seconds = 0;
+
+/* ===== Timer Functions ===== */
+function startTimer() {
+    clearInterval(timerInterval);
+    seconds = 0;
+
+    timerInterval = setInterval(() => {
+        seconds++;
+        let min = String(Math.floor(seconds / 60)).padStart(2, '0');
+        let sec = String(seconds % 60).padStart(2, '0');
+        document.getElementById("timer").innerText = `${min}:${sec}`;
+    }, 1000);
+}
+
+function endSession() {
+    clearInterval(timerInterval);
+    alert("Session Ended");
+    window.location.href = "/";
+}
+
+/* ===== Join Room ===== */
+socket.emit("joinRoom", { roomId, email });
+
+/* ===== Receive Room Data ===== */
+socket.on("roomData", (room) => {
+
+    document.getElementById("topic").innerText =
+        "Topic: " + room.topic;
+
+    const container = document.getElementById("members");
+    container.innerHTML = "";
+
+    // Dynamic layout based on member count
+    container.className = "members-container " +
+        (room.members.length === 1 ? "one" :
+         room.members.length === 2 ? "two" :
+         room.members.length === 3 ? "three" :
+         "four");
+
+    room.members.forEach(member => {
+
+        const box = document.createElement("div");
+        box.classList.add("member-box");
+
+        if (member.isSpeaking) {
+            box.classList.add("speaking");
+        }
+
+        box.innerHTML = `
+            <div class="email">${member.email}</div>
+            <div class="status">
+                ${member.isSpeaking ? "Speaking..." : "Listening..."}
+            </div>
+        `;
+
+        container.appendChild(box);
+    });
+});
+
+document.addEventListener("click", () => {
+    socket.emit("toggleSpeaking", { roomId, email });
+});
+
+</script>
+
+</body>
+</html>

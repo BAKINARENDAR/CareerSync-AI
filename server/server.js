@@ -7,40 +7,56 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
+
+// CORS configuration - allow your frontend domain + localhost
+const corsOptions = {
+  origin: [
+    "https://careersync-client.onrender.com",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "*"   // temporary - remove in production after testing
+  ],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight OPTIONS requests for all routes
+app.options("*", cors(corsOptions));
+
+app.use(express.json());
+
 const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:5500", "http://127.0.0.1:5500", "*"],
-    methods: ["GET", "POST"],
-    credentials: true
-  }
+  cors: corsOptions
 });
 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: "*" }));
-app.use(express.json());
+let rooms = {};
+let emailCodes = {};
+let speakingStats = {};
 
-// Health check (fixes "Cannot GET /api/health")
+// Health check route
 app.get("/api/health", (req, res) => {
-  res.json({ 
-    status: "Backend running!", 
+  res.json({
+    status: "Backend running!",
     uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || "development"
   });
 });
 
-// Root route (optional but nice for testing)
+// Root route
 app.get("/", (req, res) => {
-  res.json({ 
-    message: "CareerSync AI Backend is live!", 
+  res.json({
+    message: "CareerSync AI Backend is live!",
     health: "/api/health",
-    time: new Date().toISOString()
+    apiEndpoints: ["/api/create-room", "/api/send-code", "/api/verify-code"]
   });
 });
-
-let rooms = {};
-let emailCodes = {};
-let speakingStats = {};
 
 function generateRoomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -84,12 +100,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Important: Verify transporter on startup (helps catch config issues early)
+// Verify transporter at startup
 transporter.verify((error, success) => {
   if (error) {
-    console.error("Transporter verification failed:", error);
+    console.error("Email transporter verification failed:", error);
   } else {
-    console.log("Email transporter ready");
+    console.log("Email transporter is ready");
   }
 });
 
@@ -115,37 +131,49 @@ app.post("/api/send-code", async (req, res) => {
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  emailCodes[email] = { code, roomCode };
+  emailCodes[email] = { code, roomCode, expiresAt: Date.now() + 10 * 60 * 1000 };
 
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"CareerSync AI" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "CareerSync GD Verification Code",
-      text: `Your verification code is: ${code}\n\nRoom Code: ${roomCode}\n\nThis code expires in 10 minutes.`,
-      html: `<p>Your verification code is: <strong>${code}</strong></p><p>Room: ${roomCode}</p><p>Valid for 10 minutes.</p>`
+      text: `Your verification code is: ${code}\n\nRoom Code: ${roomCode}\n\nValid for 10 minutes.`,
+      html: `
+        <h2>CareerSync AI</h2>
+        <p>Your verification code is: <strong>${code}</strong></p>
+        <p>Room Code: ${roomCode}</p>
+        <p>This code expires in 10 minutes.</p>
+        <small>If you didn't request this, ignore this email.</small>
+      `
     });
 
-    console.log(`OTP sent successfully to ${email} for room ${roomCode}`);
+    console.log(`Email sent successfully to ${email} - Message ID: ${info.messageId}`);
     res.json({ success: true, message: "OTP sent to your email" });
   } catch (err) {
     console.error("Email sending failed:", err.message);
-    console.error("Full error:", err);
-    res.status(500).json({ 
-      success: false, 
-      message: "Failed to send OTP. Please check server logs or try again later.",
-      error: err.message  // only in dev – remove in production
+    console.error("Full error stack:", err.stack);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP. Please try again later.",
+      errorDetail: process.env.NODE_ENV === "development" ? err.message : undefined
     });
   }
 });
 
-// VERIFY CODE & JOIN
+// VERIFY CODE
 app.post("/api/verify-code", (req, res) => {
   const { email, enteredCode } = req.body;
   const record = emailCodes[email];
 
   if (!record || record.code !== enteredCode) {
     return res.status(400).json({ success: false, message: "Invalid or expired code" });
+  }
+
+  // Check expiration
+  if (Date.now() > record.expiresAt) {
+    delete emailCodes[email];
+    return res.status(400).json({ success: false, message: "Code has expired" });
   }
 
   const room = rooms[record.roomCode];
@@ -186,7 +214,7 @@ app.post("/api/verify-code", (req, res) => {
   res.json({ success: true, roomCode: record.roomCode, email });
 });
 
-// SOCKET.IO LOGIC (unchanged except improved logging)
+// SOCKET.IO
 io.on("connection", (socket) => {
   console.log(`New client connected: ${socket.id}`);
 
@@ -213,8 +241,10 @@ io.on("connection", (socket) => {
     const room = rooms[roomCode];
     if (room) {
       const member = room.members.find(m => m.email === email);
-      if (member) member.isSpeaking = true;
-      io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
+      if (member) {
+        member.isSpeaking = true;
+        io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
+      }
     }
   });
 
@@ -222,8 +252,10 @@ io.on("connection", (socket) => {
     const room = rooms[roomCode];
     if (room) {
       const member = room.members.find(m => m.email === email);
-      if (member) member.isSpeaking = false;
-      io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
+      if (member) {
+        member.isSpeaking = false;
+        io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
+      }
     }
   });
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -8,59 +8,51 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// CORS configuration - allow your frontend domain + localhost
+// CORS - allow your frontend + localhost
 const corsOptions = {
   origin: [
     "https://careersync-client.onrender.com",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
-    "*"   // temporary - remove in production after testing
+    "*"
   ],
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type"],
   credentials: true,
   optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
-
-// Handle preflight OPTIONS requests for all routes
 app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
-const io = new Server(server, {
-  cors: corsOptions
-});
+const io = new Server(server, { cors: corsOptions });
 
 const PORT = process.env.PORT || 5000;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 let rooms = {};
 let emailCodes = {};
 let speakingStats = {};
 
-// Health check route
+function generateRoomCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({
     status: "Backend running!",
     uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || "development"
+    timestamp: new Date().toISOString()
   });
 });
 
 // Root route
 app.get("/", (req, res) => {
-  res.json({
-    message: "CareerSync AI Backend is live!",
-    health: "/api/health",
-    apiEndpoints: ["/api/create-room", "/api/send-code", "/api/verify-code"]
-  });
+  res.json({ message: "CareerSync AI Backend is live!" });
 });
-
-function generateRoomCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
 
 // CREATE ROOM
 app.post("/api/create-room", (req, res) => {
@@ -91,25 +83,7 @@ app.get("/api/room/:code", (req, res) => {
   });
 });
 
-// EMAIL SETUP
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-// Verify transporter at startup
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("Email transporter verification failed:", error);
-  } else {
-    console.log("Email transporter is ready");
-  }
-});
-
-// SEND CODE
+// SEND CODE - Using Resend
 app.post("/api/send-code", async (req, res) => {
   const { email, roomCode } = req.body;
 
@@ -131,14 +105,14 @@ app.post("/api/send-code", async (req, res) => {
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  emailCodes[email] = { code, roomCode, expiresAt: Date.now() + 10 * 60 * 1000 };
+  emailCodes[email] = { code, roomCode };
 
   try {
-    const info = await transporter.sendMail({
-      from: `"CareerSync AI" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: "CareerSync AI <onboarding@resend.dev>", // Resend's default sender
       to: email,
       subject: "CareerSync GD Verification Code",
-      text: `Your verification code is: ${code}\n\nRoom Code: ${roomCode}\n\nValid for 10 minutes.`,
+      text: `Your verification code is: ${code}\n\nRoom Code: ${roomCode}\nValid for 10 minutes.`,
       html: `
         <h2>CareerSync AI</h2>
         <p>Your verification code is: <strong>${code}</strong></p>
@@ -148,15 +122,15 @@ app.post("/api/send-code", async (req, res) => {
       `
     });
 
-    console.log(`Email sent successfully to ${email} - Message ID: ${info.messageId}`);
+    console.log(`OTP sent to ${email} for room ${roomCode}`);
     res.json({ success: true, message: "OTP sent to your email" });
   } catch (err) {
-    console.error("Email sending failed:", err.message);
-    console.error("Full error stack:", err.stack);
+    console.error("Resend email error:", err.message);
+    console.error("Full error:", err);
     res.status(500).json({
       success: false,
-      message: "Failed to send OTP. Please try again later.",
-      errorDetail: process.env.NODE_ENV === "development" ? err.message : undefined
+      message: "Failed to send OTP. Please check server logs.",
+      errorDetail: err.message
     });
   }
 });
@@ -168,12 +142,6 @@ app.post("/api/verify-code", (req, res) => {
 
   if (!record || record.code !== enteredCode) {
     return res.status(400).json({ success: false, message: "Invalid or expired code" });
-  }
-
-  // Check expiration
-  if (Date.now() > record.expiresAt) {
-    delete emailCodes[email];
-    return res.status(400).json({ success: false, message: "Code has expired" });
   }
 
   const room = rooms[record.roomCode];
@@ -219,17 +187,16 @@ io.on("connection", (socket) => {
   console.log(`New client connected: ${socket.id}`);
 
   socket.on("join-room", ({ roomCode, email }) => {
-    console.log(`[JOIN-ROOM] ${email || 'unknown'} → room ${roomCode} (socket ${socket.id})`);
+    console.log(`[JOIN] ${email} trying to join ${roomCode}`);
 
     const room = rooms[roomCode];
     if (!room || !room.active) {
-      console.log(`[JOIN-ROOM] Failed: room ${roomCode} not found`);
       socket.emit("error", { message: "Room not found or ended" });
       return;
     }
 
     socket.join(roomCode);
-    console.log(`[JOIN-ROOM] Success: ${email} joined ${roomCode}`);
+    console.log(`[JOIN] Success: ${email} in ${roomCode}`);
 
     socket.emit("roomData", {
       topic: room.topic,
@@ -241,10 +208,8 @@ io.on("connection", (socket) => {
     const room = rooms[roomCode];
     if (room) {
       const member = room.members.find(m => m.email === email);
-      if (member) {
-        member.isSpeaking = true;
-        io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
-      }
+      if (member) member.isSpeaking = true;
+      io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
     }
   });
 
@@ -252,10 +217,8 @@ io.on("connection", (socket) => {
     const room = rooms[roomCode];
     if (room) {
       const member = room.members.find(m => m.email === email);
-      if (member) {
-        member.isSpeaking = false;
-        io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
-      }
+      if (member) member.isSpeaking = false;
+      io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
     }
   });
 
@@ -270,7 +233,7 @@ function startGD(roomCode) {
   if (!room || room.startTime) return;
 
   room.startTime = Date.now();
-  console.log(`GD timer started in room ${roomCode}`);
+  console.log(`GD started in room ${roomCode}`);
 
   room.timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - room.startTime) / 1000);
@@ -281,7 +244,6 @@ function startGD(roomCode) {
       clearInterval(room.timerInterval);
       io.to(roomCode).emit("gd-ended");
       room.active = false;
-      console.log(`GD ended in room ${roomCode}`);
     }
   }, 1000);
 }

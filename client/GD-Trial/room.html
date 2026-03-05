@@ -8,242 +8,128 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:"Inter",sans-serif;
-}
-
-body{
-    background:#191b2a;
-    color:white;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-
-header{
-    position:absolute;
-    top:30px;
-    left:40px;
-}
-
-.logo{
-    font-size:26px;
-    font-weight:600;
-}
-
-.grad{
-    background:linear-gradient(90deg,#5ee7ff,#7bb7ff,#fff);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
-
-/* Card (Same GD Style) */
-.room-card{
-    background:#263556;
-    padding:45px;
-    width:400px;
-    border-radius:28px;
-    box-shadow:0 0 25px rgba(106,169,255,0.3);
-    border:1px solid rgba(106,169,255,0.4);
-    text-align:center;
-}
-
-.room-card h2{
-    margin-bottom:30px;
-    font-weight:600;
-}
-
-/* Input */
-.input-box{
-    margin-bottom:18px;
-    text-align:left;
-}
-
-.input-box label{
-    font-size:14px;
-    color:#7bb7ff;
-}
-
-.input-box input{
-    width:100%;
-    padding:12px;
-    margin-top:6px;
-    border-radius:12px;
-    border:none;
-    outline:none;
-    background:#191b2a;
-    color:white;
-    font-size:15px;
-}
-
-/* Buttons */
-.btn{
-    width:100%;
-    padding:13px;
-    border-radius:16px;
-    border:none;
-    margin-top:10px;
-    background:linear-gradient(90deg,#5ee7ff,#7bb7ff);
-    color:#191b2a;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-.btn:hover{
-    opacity:0.85;
-}
-
-.end-btn{
-    background:#ff6b6b;
-    color:white;
-}
-
-/* Messages */
-.message{
-    margin-top:15px;
-    font-size:14px;
-}
-
-.success{
-    color:#5ee7ff;
-}
-
-.error{
-    color:#ff6b6b;
-}
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Inter",sans-serif; }
+body { background:#191b2a; color:white; height:100vh; display:flex; justify-content:center; align-items:center; }
+header { position:absolute; top:30px; left:40px; }
+.logo { font-size:26px; font-weight:600; }
+.grad { background:linear-gradient(90deg,#5ee7ff,#7bb7ff,#fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.room-card { background:#263556; padding:45px; width:400px; border-radius:28px; box-shadow:0 0 25px rgba(106,169,255,0.3); border:1px solid rgba(106,169,255,0.4); text-align:center; }
+.room-card h2 { margin-bottom:30px; font-weight:600; }
+.input-box { margin-bottom:18px; text-align:left; }
+.input-box label { font-size:14px; color:#7bb7ff; }
+.input-box input { width:100%; padding:12px; margin-top:6px; border-radius:12px; border:none; outline:none; background:#191b2a; color:white; font-size:15px; }
+.btn { width:100%; padding:13px; border-radius:16px; border:none; margin-top:10px; background:linear-gradient(90deg,#5ee7ff,#7bb7ff); color:#191b2a; font-weight:600; cursor:pointer; transition:0.3s; }
+.btn:hover { opacity:0.85; }
+.end-btn { background:#ff6b6b; color:white; }
+.message { margin-top:15px; font-size:14px; }
+.success { color:#5ee7ff; }
+.error { color:#ff6b6b; }
+.member-status { margin-top:10px; padding:10px; border-radius:10px; background:#191b2a; border:1px solid rgba(106,169,255,0.4); }
 </style>
 </head>
 
 <body>
 
 <header>
-    <div class="logo">
-        <span class="grad">C</span>areer
-        <span class="grad">S</span>ync
-        <span class="grad">A</span>I
-    </div>
+<div class="logo">
+<span class="grad">C</span>areer
+<span class="grad">S</span>ync
+<span class="grad">A</span>I
+</div>
 </header>
 
 <div class="room-card">
-    <h2>Email Verification</h2>
+<h2>Email Verification</h2>
 
-    <div class="input-box">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="Enter your email">
-    </div>
+<div class="input-box">
+<label>Email Address</label>
+<input type="email" id="email" placeholder="Enter your email">
+</div>
 
-    <button class="btn" onclick="sendCode()">Send Code</button>
+<button class="btn" onclick="sendCode()">Send Code</button>
 
-    <div class="input-box">
-        <label>Enter Code</label>
-        <input type="text" id="codeInput" placeholder="Enter received code">
-    </div>
+<div class="input-box">
+<label>Enter Code</label>
+<input type="text" id="codeInput" placeholder="Enter received code">
+</div>
 
-    <button class="btn" onclick="verifyCode()">Enter GD Room</button>
+<button class="btn" onclick="verifyCode()">Enter GD Room</button>
 
-    <button class="btn end-btn" onclick="endRoom()">End Room</button>
+<button class="btn end-btn" onclick="endRoom()">End Room</button>
 
-    <div class="message" id="msg"></div>
+<div class="message" id="msg"></div>
+
+<div id="memberBox" class="member-status">
+Members Joined : 0 / 4
+</div>
 </div>
 
 <script>
-const backendUrl = "http://localhost:5000"; // Local backend URL
-let generatedCode = null;
+const backendUrl = "http://localhost:5000";
 let currentRoom = null;
 let roomActive = true;
 
 async function createRoom() {
-    try {
-        const res = await fetch(`${backendUrl}/api/create-room`, { method: "POST" });
-        const data = await res.json();
-        if(data.success){
-            currentRoom = data.roomCode;
-            return data.roomCode;
-        } else {
-            document.getElementById("msg").innerHTML = "<span class='error'>Failed to create room.</span>";
-        }
-    } catch (err) {
-        document.getElementById("msg").innerHTML = "<span class='error'>Backend error.</span>";
-    }
+  const res = await fetch(`${backendUrl}/api/create-room`, { method: "POST" });
+  const data = await res.json();
+  if (data.success) {
+    currentRoom = data.roomCode;
+    document.getElementById("msg").innerHTML = `<span class='success'>Room created: ${currentRoom}</span>`;
+  } else {
+    document.getElementById("msg").innerHTML = `<span class='error'>Failed to create room</span>`;
+  }
 }
 
 async function sendCode() {
-    const email = document.getElementById("email").value;
-    const msg = document.getElementById("msg");
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("msg");
 
-    if(!roomActive){
-        msg.innerHTML = "<span class='error'>Room has ended.</span>";
-        return;
-    }
-    if(!email){
-        msg.innerHTML = "<span class='error'>Please enter valid email.</span>";
-        return;
-    }
+  if (!roomActive) { msg.innerHTML = "<span class='error'>Room ended.</span>"; return; }
+  if (!email) { msg.innerHTML = "<span class='error'>Enter valid email.</span>"; return; }
 
-    if(!currentRoom){
-        await createRoom();
-    }
+  if (!currentRoom) await createRoom();
 
-    try {
-        const res = await fetch(`${backendUrl}/api/send-code`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, roomCode: currentRoom })
-        });
-        const data = await res.json();
-        if(data.success){
-            msg.innerHTML = `<span class='success'>Code sent to your email.</span>`;
-        } else {
-            msg.innerHTML = `<span class='error'>Failed: ${data.message}</span>`;
-        }
-    } catch (err) {
-        msg.innerHTML = "<span class='error'>Backend error.</span>";
-    }
+  const res = await fetch(`${backendUrl}/api/send-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, roomCode: currentRoom })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    msg.innerHTML = "<span class='success'>OTP sent to email</span>";
+  } else {
+    msg.innerHTML = `<span class='error'>${data.message || "Failed to send code"}</span>`;
+  }
 }
 
 async function verifyCode() {
-    const email = document.getElementById("email").value;
-    const entered = document.getElementById("codeInput").value;
-    const msg = document.getElementById("msg");
+  const email = document.getElementById("email").value.trim();
+  const entered = document.getElementById("codeInput").value.trim();
+  const msg = document.getElementById("msg");
 
-    if(!entered){
-        msg.innerHTML = "<span class='error'>Enter the OTP.</span>";
-        return;
-    }
+  if (!email || !entered) {
+    msg.innerHTML = "<span class='error'>Fill both fields</span>";
+    return;
+  }
 
-    try {
-        const res = await fetch(`${backendUrl}/api/verify-code`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, enteredCode: entered })
-        });
+  const res = await fetch(`${backendUrl}/api/verify-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, enteredCode: entered })
+  });
 
-        const data = await res.json();
-
-        if(data.success){
-            msg.innerHTML = "<span class='success'>Access Granted!</span>";
-            setTimeout(()=>{
-               window.location.href = `members.html?room=${data.roomCode}&email=${email}`;
-            },1000);
-        } else {
-            msg.innerHTML = `<span class='error'>${data.message}</span>`;
-        }
-
-    } catch(err){
-        msg.innerHTML = "<span class='error'>Backend error.</span>";
-    }
+  const data = await res.json();
+  if (data.success) {
+    window.location.href = `members.html?room=${data.roomCode}&email=${encodeURIComponent(email)}`;
+  } else {
+    msg.innerHTML = `<span class='error'>${data.message || "Verification failed"}</span>`;
+  }
 }
-function endRoom(){
-    roomActive = false;
-    generatedCode = null;
-    document.getElementById("msg").innerHTML =
-        "<span class='error'>Room ended successfully.</span>";
+
+function endRoom() {
+  roomActive = false;
+  document.getElementById("msg").innerHTML = "<span class='error'>Room ended.</span>";
 }
 </script>
 

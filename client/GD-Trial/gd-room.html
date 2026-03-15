@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareerSync AI | Group Discussion</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
         body { background: #191b2a; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
@@ -83,6 +83,7 @@
     </div>
 
     <div id="audio-container" style="display:none;"></div>
+
 <script>
         const BACKEND_URL = "https://careersync-backend-yo5x.onrender.com";
         const socket = io(BACKEND_URL);
@@ -108,7 +109,8 @@
         let recognition;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = false; // Forces fast printing
+            // CRITICAL FIX: Setting continuous to false forces the browser to print text FAST
+            recognition.continuous = false; 
             recognition.interimResults = false; 
             recognition.lang = "en-IN";
             
@@ -121,10 +123,18 @@
                 }
             };
             
+            // Auto-restart loop to keep listening after fast-printing
             recognition.onend = () => { 
                 if (isSessionActive && currentSpeaker === pName) { 
                     try { recognition.start(); } catch(e) {} 
                 } 
+            };
+            
+            // Crash recovery for mobile browsers
+            recognition.onerror = () => {
+                if (isSessionActive && currentSpeaker === pName) {
+                    setTimeout(() => { try { recognition.start(); } catch(e) {} }, 300);
+                }
             };
         }
 
@@ -138,10 +148,15 @@
         }
 
         socket.on("gd-new-message", (data) => {
-            if (data.name !== pName) displayTranscript(data.name, data.text);
+            if (!data?.name || !data?.text) return;
+            const incoming = String(data.name).trim().toLowerCase();
+            const mine    = String(pName).trim().toLowerCase();
+            if (incoming !== mine) {
+                displayTranscript(data.name, data.text);
+            }
         });
 
-        // --- LIVEKIT SETUP ---
+        // --- LIVEKIT SETUP & AUDIO ROUTING ---
         async function initRoom() {
             try {
                 localRoom = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
@@ -197,27 +212,23 @@
                 micBtn.classList.add('mic-mine');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
                 
-                // CRITICAL FIX: SEQUENCE THE HARDWARE LOCKS
-                // 1. Start the Text Recognizer FIRST
-                if (recognition) { try { recognition.start(); } catch(e) {} }
-                
-                // 2. Wait 400ms, THEN open the Voice Call. This stops Android from crashing.
-                setTimeout(() => {
-                    if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(true);
-                }, 400);
+                // CRITICAL FIX: Ensure WebRTC claims mic FIRST, then start transcript engine to prevent mobile crash
+                localRoom.localParticipant.setMicrophoneEnabled(true).then(() => {
+                    if (recognition) { try { recognition.start(); } catch(e) {} }
+                });
                 
             } else if (currentSpeaker !== null) {
                 // SOMEONE ELSE HAS IT
                 micBtn.disabled = true;
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
+                localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             } else {
                 // MIC IS FREE
                 micBtn.disabled = false;
                 micBtn.classList.add('mic-free');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
+                localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             }
         });
@@ -228,7 +239,6 @@
             if (currentSpeaker === pName) {
                 socket.emit("release-mic", { roomCode });
                 if (recognition) recognition.stop();
-                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
             } else if (currentSpeaker === null) {
                 socket.emit("claim-mic", { roomCode, name: pName });
             }

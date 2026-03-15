@@ -86,7 +86,8 @@ app.post("/api/gd/create-room", (req, res) => {
 
 // ────────────────────────────────────────────────
 // GD: Generate LiveKit access token for a participant
-app.post("/api/gd/get-livekit-token", (req, res) => {
+// FIXED: Added 'async' to the route handler
+app.post("/api/gd/get-livekit-token", async (req, res) => {
   const { roomCode, participantName } = req.body;
 
   if (!roomCode || !participantName) {
@@ -118,7 +119,8 @@ app.post("/api/gd/get-livekit-token", (req, res) => {
       canPublishData: true         // Optional: for text chat / data later
     });
 
-    const token = at.toJwt();
+    // FIXED: Added 'await' before at.toJwt()
+    const token = await at.toJwt();
 
     res.json({
       success: true,

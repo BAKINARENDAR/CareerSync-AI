@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerSync AI - Group Discussion Lobby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
+    body {
+      min-height: 100vh;
+      background-color: #191b2a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .grad { 
+      background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header { 
+      position: absolute; top:20px; left:30px; cursor: pointer; 
+    }
+    .logo { font-size:26px; font-weight:600; letter-spacing: 0.5px; }
+    .container { 
+      width: 100%; max-width: 480px; text-align:center; 
+    }
+    .title { font-size:32px; font-weight:600; margin-bottom:8px; }
+    .subtitle { color:#898a9e; font-size:17px; margin-bottom:30px; }
+    .voice-circle {
+      width:220px; height:220px; border-radius:50%;
+      border:7px solid #ffffff;
+      box-shadow: 0 0 15px #ffffff, 0 0 30px #5ee7ff, inset 0 0 20px #5ee7ff;
+      display:flex; align-items:center; justify-content:center;
+      margin:30px auto; position:relative;
+    }
+    .voice-circle::after {
+      content:""; position:absolute; inset:0; border-radius:50%;
+      background: radial-gradient(circle, rgba(94,231,255,0.15) 0%, transparent 70%);
+    }
+    .mic-icon { font-size:80px; color:#5ee7ff; filter: drop-shadow(0 0 10px #5ee7ff); }
+    input, button {
+      width:100%; padding:14px 16px; margin:12px 0;
+      border-radius:12px; border:1px solid rgba(94,231,255,0.4);
+      background:#263556; color:white; font-size:16px;
+    }
+    input::placeholder { color:#898a9e; }
+    button {
+      background: linear-gradient(90deg, #5ee7ff, #7bb7ff);
+      border:none; color:#191b2a; font-weight:600; cursor:pointer;
+      transition: all 0.2s;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(94,231,255,0.4); }
+    #status { margin:20px 0; min-height:60px; font-size:15px; line-height:1.5; color:#ffcc00; }
+    .error { color:#ff4d4d; }
+  </style>
+</head>
+<body>
+
+<header onclick="window.location.href='../index.html'">
+  <div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div>
+</header>
+
+<div class="container">
+  <h1 class="title grad">Group Discussion Lobby</h1>
+  <p class="subtitle">Join or create a real-time voice GD</p>
+
+  <div class="voice-circle">
+    <i class="fa-solid fa-microphone mic-icon"></i>
+  </div>
+
+  <input id="username" placeholder="Your name (e.g. Baki)" required autocomplete="off" />
+  <input id="roomCode" placeholder="Room code (leave blank to create new)" autocomplete="off" />
+  <button id="joinBtn">Join / Create Room</button>
+
+  <div id="status"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+<script>
+
+const BACKEND_URL = "https://careersync-backend-yo5x.onrender.com";  
+
+const joinBtn = document.getElementById('joinBtn');
+const statusEl = document.getElementById('status');
+
+joinBtn.onclick = async () => {
+  const name = document.getElementById('username').value.trim();
+  let code = document.getElementById('roomCode').value.trim();
+
+  if (!name) {
+    statusEl.innerHTML = '<span class="error">Please enter your name</span>';
+    return;
+  }
+
+  statusEl.textContent = 'Connecting to server...';
+
+  try {
+    let roomCode = code;
+    let topic = "Default GD Topic";
+
+    // Step 1: If no code → create new room
+    if (!code) {
+      const createRes = await fetch(`${BACKEND_URL}/api/gd/create-room`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}) // can send { topic: "Your topic" } later
+      });
+
+      if (!createRes.ok) {
+        const errData = await createRes.json();
+        throw new Error(errData.message || `Server error ${createRes.status}`);
+      }
+
+      const createData = await createRes.json();
+      if (!createData.success) throw new Error(createData.message || 'Room creation failed');
+
+      roomCode = createData.roomCode;
+      topic = createData.topic;
+
+      alert(`New room created!\nCode: ${roomCode}\nShare this with friends!`);
+    }
+
+    // Step 2: Get LiveKit token (for both new & existing rooms)
+    statusEl.textContent = 'Getting access token...';
+
+    const tokenRes = await fetch(`${BACKEND_URL}/api/gd/get-livekit-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        roomCode: roomCode,
+        participantName: name
+      })
+    });
+
+    if (!tokenRes.ok) {
+      const errData = await tokenRes.json();
+      throw new Error(errData.message || `Token request failed ${tokenRes.status}`);
+    }
+
+    const tokenData = await tokenRes.json();
+    if (!tokenData.success) throw new Error(tokenData.message || 'Access denied');
+
+    // Save data for gd-room.html
+    localStorage.setItem('gd_token', tokenData.token);
+    localStorage.setItem('gd_ws', tokenData.wsUrl);
+    localStorage.setItem('gd_room', tokenData.roomCode);
+    localStorage.setItem('gd_name', name);
+    localStorage.setItem('gd_topic', tokenData.topic || topic);
+
+    statusEl.innerHTML = '<span style="color:#5ee7ff">Success! Redirecting to discussion room...</span>';
+
+    // Redirect to room page
+    setTimeout(() => {
+      window.location.href = 'gd-room.html';
+    }, 1200);
+
+  } catch (err) {
+    console.error("GD Lobby Error:", err);
+    statusEl.innerHTML = `<span class="error">Error: ${err.message}</span><br>
+      <small style="color:#aaa">Check console (F12) • Make sure backend URL is correct • Check Render logs</small>`;
+  }
+};
+</script>
+</body>
+</html>

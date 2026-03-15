@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -7,6 +8,7 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
+// Merged CORS configuration for all modules
 const corsOptions = {
   origin: [
     "https://careersync-client.onrender.com",
@@ -18,7 +20,7 @@ const corsOptions = {
     "*"
   ],
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
   optionsSuccessStatus: 204
 };
@@ -27,36 +29,32 @@ app.use(cors(corsOptions));
 app.options("/*all", cors(corsOptions));
 app.use(express.json());
 
-const io = new Server(server, { cors: corsOptions });
-const PORT = process.env.PORT || 5000;
-
-// Global Rooms Object for GD state
+// Global State for GD Room Management
 let rooms = {};
 
-// --- IMPORT YOUR SEPARATED ROUTES ---
-const hrRoutes = require('./routes/hr');
-const techRoutes = require('./routes/tech');
-const gdRoutes = require('./routes/gd')(rooms); // Pass rooms object
+// ==========================================
+// IMPORT & SETUP MODULAR ROUTES
+// ==========================================
+// This points to your routes/index.js which handles HR, Technical, and GD
+const setupRoutes = require('./routes/index');
+setupRoutes(app, rooms);
 
-// --- MOUNT THE ROUTES ---
-app.use('/api', hrRoutes);     // Handles /api/analyze
-app.use('/api', techRoutes);   // Handles /api/analyze-thought & /api/analyze-concept
-app.use('/api/gd', gdRoutes);  // Handles /api/gd/create-room & /api/gd/get-livekit-token
-
-// Health Checks
+// Basic Health Checks
 app.get("/", (req, res) => res.json({ message: "CareerSync AI Hub is live!" }));
 app.get("/api/health", (req, res) => res.json({ status: "Backend running!" }));
 
-// --- GD AI FEEDBACK FUNCTION ---
+// ==========================================
+// SOCKET.IO HUB (GD Real-time Logic)
+// ==========================================
+const io = new Server(server, { cors: corsOptions });
+
+// AI Feedback Helper Function for GD
 async function generateGDAIFeedback(roomCode) {
   const room = rooms[roomCode];
   if (!room || room.transcript.length === 0) return "Not enough discussion data to generate feedback.";
 
   const script = room.transcript.map(t => `${t.name}: ${t.text}`).join('\n');
-  const prompt = `You are an expert HR Recruiter analyzing a Group Discussion.
-  Topic: ${room.topic}
-  Transcript:\n${script}\n
-  Provide brief, constructive feedback for each participant based on communication skills, logic, and contribution.`;
+  const prompt = `You are an expert HR Recruiter. Analyze this GD Transcript on the topic: ${room.topic}. Provide brief, constructive feedback for each participant.\n\nTranscript:\n${script}`;
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -65,24 +63,27 @@ async function generateGDAIFeedback(roomCode) {
       body: JSON.stringify({ model: "llama3-8b-8192", messages: [{ role: "user", content: prompt }] })
     });
     const data = await response.json();
-    if (!response.ok) return `Error from AI service: ${data.error?.message}`;
-    return data.choices && data.choices.length > 0 ? data.choices[0].message.content : "Empty response.";
+    return data.choices?.[0]?.message?.content || "AI evaluation unavailable.";
   } catch (error) {
-    return "Failed to connect to AI service.";
+    console.error("GD AI Error:", error);
+    return "Failed to connect to AI feedback service.";
   }
 }
 
-// --- SOCKET.IO FOR GD REAL-TIME ---
 io.on("connection", (socket) => {
+  console.log(`User Connected: ${socket.id}`);
+
+  // GD Join Event
   socket.on("join-gd-room", ({ roomCode, participantName }) => {
     const room = rooms[roomCode];
-    if (!room || !room.active) return socket.emit("error", { message: "Room not found or ended" });
+    if (!room || !room.active) return socket.emit("error", { message: "Room not found" });
     
     socket.join(roomCode);
     io.to(roomCode).emit("participant-joined", { name: participantName, timestamp: new Date().toISOString() });
     if (room.isStarted) socket.emit("gd-started");
   });
 
+  // GD Start Sync
   socket.on("start-gd", (roomCode) => {
     if (rooms[roomCode]) {
       rooms[roomCode].isStarted = true;
@@ -90,10 +91,12 @@ io.on("connection", (socket) => {
     }
   });
 
+  // GD Live Transcripts (Interim)
   socket.on("interim-transcript", ({ roomCode, name, text }) => {
     if (rooms[roomCode]) io.to(roomCode).emit("live-interim", { name, text });
   });
 
+  // GD Final Sentence Transcripts
   socket.on("new-transcript", ({ roomCode, name, text }) => {
     if (rooms[roomCode]) {
       rooms[roomCode].transcript.push({ name, text });
@@ -101,6 +104,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // GD End & AI Analysis
   socket.on("end-gd", async (roomCode) => {
     if (rooms[roomCode]) {
       rooms[roomCode].isStarted = false;
@@ -110,17 +114,23 @@ io.on("connection", (socket) => {
       io.to(roomCode).emit("gd-feedback", feedback);
     }
   });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
 });
 
-// Cleanup old rooms
+// Auto-cleanup of expired rooms (1 hour)
 setInterval(() => {
   const now = Date.now();
   for (const code in rooms) {
     if (now - rooms[code].createdAt > 60 * 60 * 1000) { 
-      io.to(code).emit("gd-ended", { message: "Room expired" });
       delete rooms[code];
     }
   }
 }, 10 * 60 * 1000);
 
-server.listen(PORT, () => console.log(`Modular Server running on port ${PORT}`));
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`CareerSync Modular Server running on port ${PORT}`);
+});

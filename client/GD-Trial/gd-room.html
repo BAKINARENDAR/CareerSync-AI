@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GD Room - CareerSync AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
+    body {
+      min-height: 100vh;
+      background-color: #191b2a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    header {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .grad {
+      background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-area {
+      text-align: center;
+      margin: 80px 20px 20px;
+    }
+    .topic {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding: 16px;
+      background: rgba(38,53,86,0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(94,231,255,0.3);
+    }
+    #timer {
+      font-size: 32px;
+      font-weight: 700;
+      color: #5ee7ff;
+      margin: 12px 0 30px;
+      text-shadow: 0 0 10px rgba(94,231,255,0.5);
+    }
+    #participants {
+      flex: 1;
+      padding: 0 20px;
+      font-size: 16px;
+      color: #ccc;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+    .speaking {
+      color: #5ee7ff;
+      font-weight: 600;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { text-shadow: 0 0 4px #5ee7ff; }
+      50% { text-shadow: 0 0 12px #5ee7ff, 0 0 20px #5ee7ff; }
+      100% { text-shadow: 0 0 4px #5ee7ff; }
+    }
+    .controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 24px;
+      z-index: 10;
+    }
+    .control-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #263556;
+      border: 3px solid #5ee7ff44;
+      color: #5ee7ff;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .control-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 25px rgba(94,231,255,0.35);
+    }
+    .control-btn.mute-active {
+      background: #ff4d4d;
+      border-color: #ff4d4d;
+      color: white;
+    }
+    .status-bar {
+      text-align: center;
+      padding: 12px;
+      background: rgba(38,53,86,0.6);
+      margin: 20px auto;
+      max-width: 400px;
+      border-radius: 12px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<header onclick="window.location.href='../index.html'">
+  <div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div>
+</header>
+
+<div class="header-area">
+  <div class="topic" id="topicDisplay">Group Discussion in progress...</div>
+  <div id="timer">15:00</div>
+</div>
+
+<div id="participants">Participants: Loading...</div>
+
+<div class="controls">
+  <button class="control-btn" id="muteBtn" title="Mute / Unmute">
+    <i class="fa-solid fa-microphone"></i>
+  </button>
+  <button class="control-btn" id="leaveBtn" title="Leave discussion">
+    <i class="fa-solid fa-phone-slash"></i>
+  </button>
+</div>
+
+<div class="status-bar" id="status">Connecting to discussion room...</div>
+
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+<script>
+  const { Room, RoomEvent, createLocalAudioTrack } = LivekitClient;
+
+  // Retrieve data from lobby
+  const token      = localStorage.getItem('gd_token');
+  const wsUrl      = localStorage.getItem('gd_ws');
+  const roomCode   = localStorage.getItem('gd_room');
+  const name       = localStorage.getItem('gd_name');
+  const topic      = localStorage.getItem('gd_topic') || 'Group Discussion';
+
+  document.getElementById('topicDisplay').textContent = topic;
+  document.getElementById('status').textContent = `Room: ${roomCode} • You: ${name}`;
+
+  let room = null;
+  let localAudioTrack = null;
+  let isMuted = false;
+  let timerInterval = null;
+
+  async function connectToRoom() {
+    if (!token || !wsUrl || !roomCode || !name) {
+      document.getElementById('status').innerHTML = 
+        '<span style="color:#ff4d4d">Session data missing. Go back to lobby.</span>';
+      return;
+    }
+
+    try {
+      room = new Room({
+        adaptiveStream: true,
+        dynacast: true,
+        reconnectPolicy: new LivekitClient.ReconnectPolicy({ maxReconnectAttempts: 5 })
+      });
+
+      await room.connect(wsUrl, token);
+      document.getElementById('status').innerHTML = 
+        '<span style="color:#5ee7ff">Connected! Microphone ready.</span>';
+
+      // Publish microphone
+      localAudioTrack = await createLocalAudioTrack();
+      await room.localParticipant.publishTrack(localAudioTrack);
+
+      // Start 15-minute timer
+      let secondsLeft = 15 * 60;
+      const timerEl = document.getElementById('timer');
+      timerInterval = setInterval(() => {
+        secondsLeft--;
+        const min = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+        const sec = (secondsLeft % 60).toString().padStart(2, '0');
+        timerEl.textContent = `${min}:${sec}`;
+
+        if (secondsLeft <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('status').innerHTML = 
+            '<span style="color:#ffcc00">Discussion ended. Leaving room...</span>';
+          setTimeout(() => room.disconnect(), 2000);
+        }
+      }, 1000);
+
+      updateParticipants();
+
+      // Listen for speaking changes
+      room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+        updateParticipants(speakers.map(p => p.identity));
+      });
+
+      room.on(RoomEvent.ParticipantConnected, updateParticipants);
+      room.on(RoomEvent.ParticipantDisconnected, updateParticipants);
+
+      // Optional: show when someone joins
+      room.on(RoomEvent.ParticipantConnected, (participant) => {
+        document.getElementById('status').innerHTML = 
+          `<span style="color:#5ee7ff">${participant.identity} joined the discussion</span>`;
+        setTimeout(() => {
+          document.getElementById('status').textContent = `Room: ${roomCode} • You: ${name}`;
+        }, 4000);
+      });
+
+    } catch (err) {
+      console.error("LiveKit connection failed:", err);
+      document.getElementById('status').innerHTML = 
+        `<span style="color:#ff4d4d">Connection failed: ${err.message}</span>`;
+    }
+  }
+
+  function updateParticipants(activeSpeakers = []) {
+    if (!room) return;
+
+    const list = [];
+    // Local participant
+    const isYouSpeaking = activeSpeakers.includes(name);
+    list.push(
+      isYouSpeaking 
+        ? `<span class="speaking">${name} (you - speaking)</span>`
+        : `${name} (you)`
+    );
+
+    // Remote participants
+    room.remoteParticipants.forEach((p) => {
+      const isSpeaking = activeSpeakers.includes(p.identity);
+      list.push(
+        isSpeaking 
+          ? `<span class="speaking">${p.identity} (speaking)</span>`
+          : p.identity
+      );
+    });
+
+    document.getElementById('participants').innerHTML = 
+      list.length > 0 
+        ? `Participants: ${list.join(' • ')}`
+        : 'Waiting for others to join...';
+  }
+
+  // Mute / Unmute
+  document.getElementById('muteBtn').onclick = () => {
+    if (!room || !localAudioTrack) return;
+    isMuted = !isMuted;
+    room.localParticipant.setMicrophoneEnabled(!isMuted);
+    const btn = document.getElementById('muteBtn');
+    btn.innerHTML = `<i class="fa-solid fa-microphone${isMuted ? '-slash' : ''}"></i>`;
+    btn.className = `control-btn ${isMuted ? 'mute-active' : ''}`;
+  };
+
+  // Leave
+  document.getElementById('leaveBtn').onclick = () => {
+    if (room) {
+      room.disconnect();
+      clearInterval(timerInterval);
+    }
+    // Clean localStorage
+    ['gd_token','gd_ws','gd_room','gd_name','gd_topic'].forEach(k => localStorage.removeItem(k));
+    window.location.href = '../index.html';
+  };
+
+  // Start connection
+  connectToRoom();
+
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    if (room) room.disconnect();
+    if (timerInterval) clearInterval(timerInterval);
+  });
+</script>
+</body>
+</html>

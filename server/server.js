@@ -1,14 +1,15 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
-const { Resend } = require("resend");
 require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
+const { AccessToken } = require("livekit-server-sdk");
 
 const app = express();
 const server = http.createServer(app);
 
-// CORS - allow your frontend + localhost
+// CORS configuration (your original settings)
 const corsOptions = {
   origin: [
     "https://careersync-client.onrender.com",
@@ -23,24 +24,30 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+
+// Fix for Express 5 wildcard issue
+app.options("/*all", cors(corsOptions));
 
 app.use(express.json());
 
 const io = new Server(server, { cors: corsOptions });
 
 const PORT = process.env.PORT || 5000;
-const resend = new Resend(process.env.RESEND_API_KEY);
 
-let rooms = {};
-let emailCodes = {};
-let speakingStats = {};
+// LiveKit credentials – MUST be in .env on production!
+const LIVEKIT_API_KEY    = process.env.LIVEKIT_API_KEY    || 'APIJQKhWwecEzs';
+const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET || 'dgWkNj05gSLEsV2FvcnFmr1GubBgTfXY3YZOr08RBEB';
+const LIVEKIT_WS_URL     = process.env.LIVEKIT_WS_URL     || 'wss://careersync-ai-5761xc62.livekit.cloud';
+
+// In-memory storage for active GD rooms
+let rooms = {};  // { roomCode: { topic, createdAt, active: true } }
 
 function generateRoomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-// Health check
+// ────────────────────────────────────────────────
+// Health check endpoints (unchanged)
 app.get("/api/health", (req, res) => {
   res.json({
     status: "Backend running!",
@@ -49,177 +56,112 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Root route
 app.get("/", (req, res) => {
   res.json({ message: "CareerSync AI Backend is live!" });
 });
 
-// CREATE ROOM
-app.post("/api/create-room", (req, res) => {
-  const code = generateRoomCode();
-  rooms[code] = {
-    members: [],
-    topic: "Is Artificial Intelligence replacing human jobs?",
-    duration: 300,
-    startTime: null,
-    timerInterval: null,
+// ────────────────────────────────────────────────
+// GD: Create a new discussion room
+app.post("/api/gd/create-room", (req, res) => {
+  const { topic } = req.body;  // optional: client can send custom topic
+
+  const roomCode = generateRoomCode();
+
+  rooms[roomCode] = {
+    topic: topic || "Is Artificial Intelligence replacing human jobs?",
+    createdAt: Date.now(),
     active: true
   };
-  console.log(`Room created: ${code}`);
-  res.json({ success: true, roomCode: code });
-});
 
-// GET ROOM INFO
-app.get("/api/room/:code", (req, res) => {
-  const room = rooms[req.params.code];
-  if (!room || !room.active) {
-    return res.status(404).json({ success: false, message: "Room not found or ended" });
-  }
+  console.log(`New GD room created: ${roomCode} | Topic: ${rooms[roomCode].topic}`);
+
   res.json({
     success: true,
-    members: room.members,
-    topic: room.topic,
-    duration: room.duration
+    roomCode,
+    wsUrl: LIVEKIT_WS_URL,
+    topic: rooms[roomCode].topic,
+    message: "Share this code with others to join the voice discussion"
   });
 });
 
-// SEND CODE - Using Resend
-app.post("/api/send-code", async (req, res) => {
-  const { email, roomCode } = req.body;
+// ────────────────────────────────────────────────
+// GD: Generate LiveKit access token for a participant
+app.post("/api/gd/get-livekit-token", (req, res) => {
+  const { roomCode, participantName } = req.body;
 
-  if (!email || !roomCode) {
-    return res.status(400).json({ success: false, message: "Missing email or roomCode" });
+  if (!roomCode || !participantName) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "roomCode and participantName are required" 
+    });
   }
 
   const room = rooms[roomCode];
   if (!room || !room.active) {
-    return res.status(404).json({ success: false, message: "Room not found or ended" });
+    return res.status(404).json({ 
+      success: false, 
+      message: "Room not found or has ended" 
+    });
   }
-
-  if (room.members.length >= 4) {
-    return res.status(400).json({ success: false, message: "Room is full" });
-  }
-
-  if (room.members.some(m => m.email === email)) {
-    return res.status(400).json({ success: false, message: "You already joined this room" });
-  }
-
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  emailCodes[email] = { code, roomCode };
 
   try {
-    await resend.emails.send({
-      from: "CareerSync AI <onboarding@resend.dev>", // Resend's default sender
-      to: email,
-      subject: "CareerSync GD Verification Code",
-      text: `Your verification code is: ${code}\n\nRoom Code: ${roomCode}\nValid for 10 minutes.`,
-      html: `
-        <h2>CareerSync AI</h2>
-        <p>Your verification code is: <strong>${code}</strong></p>
-        <p>Room Code: ${roomCode}</p>
-        <p>This code expires in 10 minutes.</p>
-        <small>If you didn't request this, ignore this email.</small>
-      `
+    const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+      identity: participantName,   // This will be displayed as participant name
+      ttl: "2h"                    // Token valid for 2 hours
     });
 
-    console.log(`OTP sent to ${email} for room ${roomCode}`);
-    res.json({ success: true, message: "OTP sent to your email" });
+    at.addGrant({
+      roomJoin: true,
+      room: roomCode,              // LiveKit room name = your room code
+      canPublish: true,            // Can speak (publish audio)
+      canSubscribe: true,          // Can hear others
+      canPublishData: true         // Optional: for text chat / data later
+    });
+
+    const token = at.toJwt();
+
+    res.json({
+      success: true,
+      token,
+      wsUrl: LIVEKIT_WS_URL,
+      roomCode,
+      topic: room.topic
+    });
   } catch (err) {
-    console.error("Resend email error:", err.message);
-    console.error("Full error:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send OTP. Please check server logs.",
-      errorDetail: err.message
+    console.error("LiveKit token generation failed:", err.message);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to generate access token" 
     });
   }
 });
 
-// VERIFY CODE
-app.post("/api/verify-code", (req, res) => {
-  const { email, enteredCode } = req.body;
-  const record = emailCodes[email];
-
-  if (!record || record.code !== enteredCode) {
-    return res.status(400).json({ success: false, message: "Invalid or expired code" });
-  }
-
-  const room = rooms[record.roomCode];
-  if (!room || !room.active) {
-    return res.status(404).json({ success: false, message: "Room not found or ended" });
-  }
-
-  if (room.members.some(m => m.email === email)) {
-    return res.status(400).json({ success: false, message: "Already joined" });
-  }
-
-  if (room.members.length >= 4) {
-    return res.status(400).json({ success: false, message: "Room full" });
-  }
-
-  const member = {
-    email,
-    joinedAt: new Date().toISOString(),
-    isSpeaking: false
-  };
-
-  room.members.push(member);
-  console.log(`Member joined: ${email} → Room ${record.roomCode} now ${room.members.length}/4`);
-
-  speakingStats[email] = { speakingTime: 0, turns: 0, lastStart: null };
-
-  if (room.members.length === 4) {
-    startGD(record.roomCode);
-  }
-
-  delete emailCodes[email];
-
-  io.to(record.roomCode).emit("roomData", {
-    topic: room.topic,
-    members: room.members
-  });
-
-  res.json({ success: true, roomCode: record.roomCode, email });
-});
-
-// SOCKET.IO
+// ────────────────────────────────────────────────
+// Socket.IO connection handling (minimal for now)
 io.on("connection", (socket) => {
-  console.log(`New client connected: ${socket.id}`);
+  console.log(`Client connected: ${socket.id}`);
 
-  socket.on("join-room", ({ roomCode, email }) => {
-    console.log(`[JOIN] ${email} trying to join ${roomCode}`);
-
+  // Client joins the room (for notifications / future features)
+  socket.on("join-gd-room", ({ roomCode, participantName }) => {
     const room = rooms[roomCode];
     if (!room || !room.active) {
-      socket.emit("error", { message: "Room not found or ended" });
+      socket.emit("error", { message: "Room not found or has ended" });
       return;
     }
 
     socket.join(roomCode);
-    console.log(`[JOIN] Success: ${email} in ${roomCode}`);
+    console.log(`${participantName} joined GD room ${roomCode}`);
 
-    socket.emit("roomData", {
-      topic: room.topic,
-      members: room.members
+    // Notify others in the room
+    io.to(roomCode).emit("participant-joined", {
+      name: participantName,
+      timestamp: new Date().toISOString()
     });
-  });
 
-  socket.on("start-speaking", ({ roomCode, email }) => {
-    const room = rooms[roomCode];
-    if (room) {
-      const member = room.members.find(m => m.email === email);
-      if (member) member.isSpeaking = true;
-      io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
-    }
-  });
-
-  socket.on("stop-speaking", ({ roomCode, email }) => {
-    const room = rooms[roomCode];
-    if (room) {
-      const member = room.members.find(m => m.email === email);
-      if (member) member.isSpeaking = false;
-      io.to(roomCode).emit("roomData", { topic: room.topic, members: room.members });
-    }
+    socket.emit("room-info", {
+      topic: room.topic,
+      message: "Connected to voice discussion – enable your microphone"
+    });
   });
 
   socket.on("disconnect", () => {
@@ -227,27 +169,22 @@ io.on("connection", (socket) => {
   });
 });
 
-// START GD TIMER
-function startGD(roomCode) {
-  const room = rooms[roomCode];
-  if (!room || room.startTime) return;
-
-  room.startTime = Date.now();
-  console.log(`GD started in room ${roomCode}`);
-
-  room.timerInterval = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - room.startTime) / 1000);
-    const remaining = room.duration - elapsed;
-    io.to(roomCode).emit("timer-update", remaining);
-
-    if (remaining <= 0) {
-      clearInterval(room.timerInterval);
-      io.to(roomCode).emit("gd-ended");
-      room.active = false;
+// ────────────────────────────────────────────────
+// Optional: Clean up old/inactive rooms every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const code in rooms) {
+    const age = now - rooms[code].createdAt;
+    if (age > 60 * 60 * 1000) { // 1 hour timeout
+      rooms[code].active = false;
+      io.to(code).emit("gd-ended", { message: "Room has expired" });
+      delete rooms[code];
+      console.log(`Cleaned up expired room: ${code}`);
     }
-  }, 1000);
-}
+  }
+}, 10 * 60 * 1000);
 
+// Start the server
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`CareerSync AI server running on port ${PORT}`);
 });

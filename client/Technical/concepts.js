@@ -21,40 +21,27 @@ recognition.lang = "en-IN";
 const API_KEY = "YOUR_OPENAI_API_KEY";
 
 async function getAIResponse(userFeedback, type) {
-  const prompt =
-    type === "question"
-      ? `You are a technical interviewer. Ask a professional ${
-          topics[currentTopicIndex]
-        } interview question for a B.Tech student. Question number ${
-          questionCount + 1
-        } of 5.`
-      : `The student answered: "${userFeedback}". If the answer is wrong, explain the correct answer briefly and say "Let's move to the next one". If right, say "Excellent". Don't be too long.`;
+  const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0')
+    ? "http://localhost:5000" 
+    : "https://careersync-backend-yo5x.onrender.com";
+
+  const endpoint = type === "question" ? "/api/analyze-concept" : "/api/analyze-concept";
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(`${BACKEND_URL}${endpoint}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful Technical Interviewer.",
-          },
-          { role: "user", content: prompt },
-        ],
+        message: userFeedback || "Start the interview",
+        history: [], // You can manage history here if needed
+        studentName: studentName,
+        subject: topics[currentTopicIndex]
       }),
     });
     const data = await response.json();
-    return data.choices[0].message.content;
+    return data.feedback;
   } catch (e) {
-    return (
-      "System error. Let's continue. Tell me what you know about " +
-      topics[currentTopicIndex]
-    );
+    return "System error. Let's continue.";
   }
 }
 

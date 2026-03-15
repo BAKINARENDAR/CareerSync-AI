@@ -4,117 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GD Room - CareerSync AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
-    body {
-      min-height: 100vh;
-      background-color: #191b2a;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-    header {
-      position: absolute;
-      top: 20px;
-      left: 30px;
-      cursor: pointer;
-      z-index: 10;
-    }
-    .logo {
-      font-size: 26px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    .grad {
-      background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .header-area {
-      text-align: center;
-      margin: 80px 20px 20px;
-    }
-    .topic {
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      padding: 16px;
-      background: rgba(38,53,86,0.5);
-      border-radius: 12px;
-      border: 1px solid rgba(94,231,255,0.3);
-    }
-    #timer {
-      font-size: 32px;
-      font-weight: 700;
-      color: #5ee7ff;
-      margin: 12px 0 30px;
-      text-shadow: 0 0 10px rgba(94,231,255,0.5);
-    }
-    #participants {
-      flex: 1;
-      padding: 0 20px;
-      font-size: 16px;
-      color: #ccc;
-      line-height: 1.6;
-      overflow-y: auto;
-    }
-    .speaking {
-      color: #5ee7ff;
-      font-weight: 600;
-      animation: pulse 1.8s infinite;
-    }
-    @keyframes pulse {
-      0% { text-shadow: 0 0 4px #5ee7ff; }
-      50% { text-shadow: 0 0 12px #5ee7ff, 0 0 20px #5ee7ff; }
-      100% { text-shadow: 0 0 4px #5ee7ff; }
-    }
-    .controls {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 24px;
-      z-index: 10;
-    }
-    .control-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: #263556;
-      border: 3px solid #5ee7ff44;
-      color: #5ee7ff;
-      font-size: 28px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    }
-    .control-btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 8px 25px rgba(94,231,255,0.35);
-    }
-    .control-btn.mute-active {
-      background: #ff4d4d;
-      border-color: #ff4d4d;
-      color: white;
-    }
-    .status-bar {
-      text-align: center;
-      padding: 12px;
-      background: rgba(38,53,86,0.6);
-      margin: 20px auto;
-      max-width: 400px;
-      border-radius: 12px;
-      font-size: 15px;
-    }
+    body { min-height: 100vh; background-color: #191b2a; color: white; display: flex; flex-direction: column; padding: 20px; }
+    header { position: absolute; top: 20px; left: 30px; cursor: pointer; z-index: 10; }
+    .logo { font-size: 26px; font-weight: 600; }
+    .grad { background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .header-area { text-align: center; margin: 80px 20px 10px; }
+    .topic { font-size: 22px; font-weight: 600; margin-bottom: 12px; padding: 16px; background: rgba(38,53,86,0.5); border-radius: 12px; border: 1px solid rgba(94,231,255,0.3); }
+    #timer { font-size: 32px; font-weight: 700; color: #5ee7ff; margin: 12px 0 10px; }
+    
+    .main-content { display: flex; flex: 1; gap: 20px; margin-bottom: 100px; padding: 0 20px; }
+    #participants { flex: 1; padding: 20px; background: #263556; border-radius: 12px; overflow-y: auto; }
+    
+    /* Live Subtitles Box */
+    #subtitles-box { flex: 2; padding: 20px; background: #1f2a44; border-radius: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(94,231,255,0.2); }
+    .subtitle-line { background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; font-size: 15px; }
+    .subtitle-name { color: #5ee7ff; font-weight: 600; margin-right: 8px; }
+
+    .controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 10; align-items: center; }
+    .control-btn { width: 60px; height: 60px; border-radius: 50%; background: #263556; border: 2px solid #5ee7ff44; color: #5ee7ff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .control-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(94,231,255,0.3); }
+    .control-btn.mute-active { background: #ff4d4d; border-color: #ff4d4d; color: white; }
+    
+    .action-btn { padding: 0 24px; height: 60px; border-radius: 30px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    #startBtn { background: #5ee7ff; color: #191b2a; }
+    #endBtn { background: #ff4d4d; color: white; display: none; }
+
+    /* Feedback Modal */
+    #feedback-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .feedback-content { background: #191b2a; border: 1px solid #5ee7ff; border-radius: 16px; padding: 30px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; line-height: 1.6; }
+    .feedback-content h2 { color: #5ee7ff; margin-bottom: 15px; }
   </style>
 </head>
 <body>
@@ -124,29 +47,42 @@
 </header>
 
 <div class="header-area">
-  <div class="topic" id="topicDisplay">Group Discussion in progress...</div>
+  <div class="topic" id="topicDisplay">Loading Topic...</div>
   <div id="timer">15:00</div>
+  <div id="status" style="color:#ffcc00; font-size:14px;">Waiting to start...</div>
 </div>
 
-<div id="participants">Participants: Loading...</div>
+<div class="main-content">
+  <div id="participants">Participants loading...</div>
+  <div id="subtitles-box">
+    <div style="color: #898a9e; text-align: center; margin-top: 20px;">Live transcripts will appear here once the GD starts.</div>
+  </div>
+</div>
 
 <div class="controls">
-  <button class="control-btn" id="muteBtn" title="Mute / Unmute">
-    <i class="fa-solid fa-microphone"></i>
-  </button>
-  <button class="control-btn" id="leaveBtn" title="Leave discussion">
-    <i class="fa-solid fa-phone-slash"></i>
-  </button>
+  <button class="action-btn" id="startBtn">Start GD</button>
+  <button class="control-btn" id="muteBtn" title="Mute / Unmute" disabled><i class="fa-solid fa-microphone-slash"></i></button>
+  <button class="action-btn" id="endBtn">End GD & Get Feedback</button>
 </div>
 
-<div class="status-bar" id="status">Connecting to discussion room...</div>
+<div id="feedback-modal">
+  <div class="feedback-content">
+    <h2>🤖 AI Performance Feedback</h2>
+    <div id="feedback-text">Analyzing transcript... Please wait...</div>
+    <button class="action-btn" style="background:#5ee7ff; color:#191b2a; margin-top:20px; width:100%;" onclick="leaveRoom()">Exit Room</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
 <script>
+  // Point to Localhost for testing
+  const BACKEND_URL = "http://localhost:5000"; 
+  const socket = io(BACKEND_URL);
+
   const { Room, RoomEvent, createLocalAudioTrack } = LivekitClient;
 
-  // Retrieve data from lobby
   const token      = localStorage.getItem('gd_token');
   const wsUrl      = localStorage.getItem('gd_ws');
   const roomCode   = localStorage.getItem('gd_room');
@@ -154,133 +90,149 @@
   const topic      = localStorage.getItem('gd_topic') || 'Group Discussion';
 
   document.getElementById('topicDisplay').textContent = topic;
-  document.getElementById('status').textContent = `Room: ${roomCode} • You: ${name}`;
 
   let room = null;
   let localAudioTrack = null;
-  let isMuted = false;
+  let isMuted = true; // Start muted
   let timerInterval = null;
+  let isGDActive = false;
 
-  async function connectToRoom() {
-    if (!token || !wsUrl || !roomCode || !name) {
-      document.getElementById('status').innerHTML = 
-        '<span style="color:#ff4d4d">Session data missing. Go back to lobby and try again.</span>';
-      return;
+  // Web Speech API Setup for Transcribing
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = false; // Only send final sentences
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    if (transcript && !isMuted) {
+      // Send text to backend
+      socket.emit("new-transcript", { roomCode, name, text: transcript });
     }
+  };
 
-    try {
-      // ────────────────────────────────────────────────
-      // Fixed: removed invalid ReconnectPolicy constructor
-      room = new Room({
-        adaptiveStream: true,
-        dynacast: true
-        // No reconnectPolicy needed – SDK default is good
-      });
-      // ────────────────────────────────────────────────
+  recognition.onend = () => {
+    // Keep recognition running if GD is active
+    if (isGDActive && !isMuted) recognition.start();
+  };
 
-      await room.connect(wsUrl, token);
-      document.getElementById('status').innerHTML = 
-        '<span style="color:#5ee7ff">Connected! Microphone ready. Speak now.</span>';
+  async function connectLiveKit() {
+    room = new Room({ adaptiveStream: true, dynacast: true });
+    await room.connect(wsUrl, token);
+    
+    // Connect to Socket.io Room
+    socket.emit("join-gd-room", { roomCode, participantName: name });
 
-      // Publish microphone
+    updateParticipants();
+    room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => updateParticipants(speakers.map(p => p.identity)));
+    room.on(RoomEvent.ParticipantConnected, updateParticipants);
+    room.on(RoomEvent.ParticipantDisconnected, updateParticipants);
+  }
+
+  // --- Socket.io Event Listeners ---
+
+  document.getElementById('startBtn').onclick = () => {
+    socket.emit("start-gd", roomCode);
+  };
+
+  document.getElementById('endBtn').onclick = () => {
+    socket.emit("end-gd", roomCode);
+  };
+
+  socket.on("gd-started", async () => {
+    isGDActive = true;
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('endBtn').style.display = 'block';
+    document.getElementById('status').innerHTML = '<span style="color:#5ee7ff">GD is Live! Unmute to speak.</span>';
+    document.getElementById('subtitles-box').innerHTML = ''; // Clear waiting text
+    
+    // Enable Mute Button and Publish Track
+    const muteBtn = document.getElementById('muteBtn');
+    muteBtn.disabled = false;
+    
+    if(!localAudioTrack) {
       localAudioTrack = await createLocalAudioTrack();
       await room.localParticipant.publishTrack(localAudioTrack);
-
-      // Start 15-minute timer
-      let secondsLeft = 15 * 60;
-      const timerEl = document.getElementById('timer');
-      timerInterval = setInterval(() => {
-        secondsLeft--;
-        const min = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
-        const sec = (secondsLeft % 60).toString().padStart(2, '0');
-        timerEl.textContent = `${min}:${sec}`;
-
-        if (secondsLeft <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('status').innerHTML = 
-            '<span style="color:#ffcc00">Discussion ended. Leaving room...</span>';
-          setTimeout(() => room.disconnect(), 2000);
-        }
-      }, 1000);
-
-      updateParticipants();
-
-      room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
-        updateParticipants(speakers.map(p => p.identity));
-      });
-
-      room.on(RoomEvent.ParticipantConnected, updateParticipants);
-      room.on(RoomEvent.ParticipantDisconnected, updateParticipants);
-
-      room.on(RoomEvent.ParticipantConnected, (participant) => {
-        document.getElementById('status').innerHTML = 
-          `<span style="color:#5ee7ff">${participant.identity} joined</span>`;
-        setTimeout(() => {
-          document.getElementById('status').textContent = `Room: ${roomCode} • You: ${name}`;
-        }, 4000);
-      });
-
-    } catch (err) {
-      console.error("LiveKit connection failed:", err);
-      document.getElementById('status').innerHTML = 
-        `<span style="color:#ff4d4d">Connection failed: ${err.message || 'Unknown error'}</span><br>
-         <small>Check console • Allow microphone • Try refreshing</small>`;
+      room.localParticipant.setMicrophoneEnabled(false); // Default muted
     }
-  }
+
+    // Start Timer (15 min)
+    let secondsLeft = 15 * 60;
+    const timerEl = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+      secondsLeft--;
+      const min = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+      const sec = (secondsLeft % 60).toString().padStart(2, '0');
+      timerEl.textContent = `${min}:${sec}`;
+      if (secondsLeft <= 0) socket.emit("end-gd", roomCode);
+    }, 1000);
+  });
+
+  socket.on("live-subtitle", (data) => {
+    const box = document.getElementById('subtitles-box');
+    const line = document.createElement('div');
+    line.className = 'subtitle-line';
+    line.innerHTML = `<span class="subtitle-name">${data.name}:</span> ${data.text}`;
+    box.appendChild(line);
+    box.scrollTop = box.scrollHeight; // Auto-scroll
+  });
+
+  socket.on("gd-ended", () => {
+    isGDActive = false;
+    clearInterval(timerInterval);
+    if (localAudioTrack) room.localParticipant.setMicrophoneEnabled(false);
+    recognition.stop();
+    document.getElementById('status').innerHTML = '<span style="color:#ffcc00">GD Ended.</span>';
+  });
+
+  socket.on("analyzing-feedback", () => {
+    document.getElementById('feedback-modal').style.display = 'flex';
+  });
+
+  socket.on("gd-feedback", (feedbackText) => {
+    // Basic formatting: convert line breaks to HTML
+    const formattedText = feedbackText.replace(/\n/g, '<br>');
+    document.getElementById('feedback-text').innerHTML = formattedText;
+  });
+
+  // Mute Toggle
+  document.getElementById('muteBtn').onclick = () => {
+    if (!room || !localAudioTrack || !isGDActive) return;
+    isMuted = !isMuted;
+    room.localParticipant.setMicrophoneEnabled(!isMuted);
+    
+    const btn = document.getElementById('muteBtn');
+    if (isMuted) {
+      btn.innerHTML = `<i class="fa-solid fa-microphone-slash"></i>`;
+      btn.classList.add('mute-active');
+      recognition.stop();
+    } else {
+      btn.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+      btn.classList.remove('mute-active');
+      try { recognition.start(); } catch(e) {} // Start listening for text
+    }
+  };
 
   function updateParticipants(activeSpeakers = []) {
     if (!room) return;
-
     const list = [];
     const isYouSpeaking = activeSpeakers.includes(name);
-    list.push(
-      isYouSpeaking 
-        ? `<span class="speaking">${name} (you - speaking)</span>`
-        : `${name} (you)`
-    );
-
+    list.push(`<div>${isYouSpeaking ? `<span class="speaking">🎤 ${name} (you)</span>` : `👤 ${name} (you)`}</div>`);
+    
     room.remoteParticipants.forEach((p) => {
       const isSpeaking = activeSpeakers.includes(p.identity);
-      list.push(
-        isSpeaking 
-          ? `<span class="speaking">${p.identity} (speaking)</span>`
-          : p.identity
-      );
+      list.push(`<div>${isSpeaking ? `<span class="speaking">🎤 ${p.identity}</span>` : `👤 ${p.identity}`}</div>`);
     });
-
-    document.getElementById('participants').innerHTML = 
-      list.length > 0 
-        ? `Participants: ${list.join(' • ')}`
-        : 'Waiting for others to join... Share the room code!';
+    document.getElementById('participants').innerHTML = list.join('');
   }
 
-  // Mute / Unmute
-  document.getElementById('muteBtn').onclick = () => {
-    if (!room || !localAudioTrack) return;
-    isMuted = !isMuted;
-    room.localParticipant.setMicrophoneEnabled(!isMuted);
-    const btn = document.getElementById('muteBtn');
-    btn.innerHTML = `<i class="fa-solid fa-microphone${isMuted ? '-slash' : ''}"></i>`;
-    btn.className = `control-btn ${isMuted ? 'mute-active' : ''}`;
-  };
-
-  // Leave
-  document.getElementById('leaveBtn').onclick = () => {
-    if (room) {
-      room.disconnect();
-      clearInterval(timerInterval);
-    }
-    ['gd_token','gd_ws','gd_room','gd_name','gd_topic'].forEach(k => localStorage.removeItem(k));
-    window.location.href = '../index.html';
-  };
-
-  // Start
-  connectToRoom();
-
-  window.addEventListener('beforeunload', () => {
+  function leaveRoom() {
     if (room) room.disconnect();
-    if (timerInterval) clearInterval(timerInterval);
-  });
+    window.location.href = '../index.html';
+  }
+
+  // Initialize
+  if(token) connectLiveKit();
 </script>
 </body>
 </html>

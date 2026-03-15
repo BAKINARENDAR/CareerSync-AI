@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -98,7 +98,10 @@
         height: 260px;
         border-radius: 50%;
         border: 8px solid white;
-        box-shadow: 0 0 30px #fff, 0 0 60px #5ee7ff, inset 0 0 40px #5ee7ff;
+        box-shadow:
+          0 0 30px #fff,
+          0 0 60px #5ee7ff,
+          inset 0 0 40px #5ee7ff;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -115,7 +118,9 @@
         transition: 0.3s;
       }
       .active-mic {
-        box-shadow: 0 0 60px #fff, 0 0 100px #5ee7ff !important;
+        box-shadow:
+          0 0 60px #fff,
+          0 0 100px #5ee7ff !important;
         border: 8px solid #fff;
         cursor: pointer !important;
       }
@@ -369,8 +374,9 @@
         },
       ];
 
-      const recognition = new (window.SpeechRecognition ||
-        window.webkitSpeechRecognition)();
+      const recognition = new (
+        window.SpeechRecognition || window.webkitSpeechRecognition
+      )();
       recognition.lang = "en-IN";
       recognition.continuous = true;
 
@@ -414,19 +420,25 @@
       }
 
       async function handleAIStep(prompt) {
+        // Detects if you are local or on Render automatically
+        const BACKEND_URL =
+          window.location.hostname.includes("localhost") ||
+          window.location.hostname.includes("127.0.0")
+            ? "http://localhost:5000"
+            : "https://careersync-backend-yo5x.onrender.com";
+
         try {
-          const res = await fetch(
-            "http://localhost:5000/api/technical/analyze-thought",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                message: prompt,
-                history: conversationHistory,
-                studentName,
-              }),
-            }
-          );
+          // Ensure there is NO "/technical" in this URL
+          const res = await fetch(`${BACKEND_URL}/api/analyze-thought`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: prompt,
+              history: conversationHistory,
+              studentName,
+            }),
+          });
+
           const data = await res.json();
           conversationHistory.push({
             role: "assistant",

@@ -85,8 +85,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
 <script>
-
-const BACKEND_URL = "https://careersync-backend-yo5x.onrender.com";  
+// Pointing to LOCALHOST so it uses the fixes we just made
+const BACKEND_URL = "http://localhost:5000";  
 
 const joinBtn = document.getElementById('joinBtn');
 const statusEl = document.getElementById('status');
@@ -106,12 +106,11 @@ joinBtn.onclick = async () => {
     let roomCode = code;
     let topic = "Default GD Topic";
 
-    // Step 1: If no code → create new room
     if (!code) {
       const createRes = await fetch(`${BACKEND_URL}/api/gd/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}) // can send { topic: "Your topic" } later
+        body: JSON.stringify({}) 
       });
 
       if (!createRes.ok) {
@@ -128,7 +127,6 @@ joinBtn.onclick = async () => {
       alert(`New room created!\nCode: ${roomCode}\nShare this with friends!`);
     }
 
-    // Step 2: Get LiveKit token (for both new & existing rooms)
     statusEl.textContent = 'Getting access token...';
 
     const tokenRes = await fetch(`${BACKEND_URL}/api/gd/get-livekit-token`, {
@@ -148,7 +146,9 @@ joinBtn.onclick = async () => {
     const tokenData = await tokenRes.json();
     if (!tokenData.success) throw new Error(tokenData.message || 'Access denied');
 
-    // Save data for gd-room.html
+    // Nuke old cache explicitly before setting new ones just in case
+    localStorage.clear();
+
     localStorage.setItem('gd_token', tokenData.token);
     localStorage.setItem('gd_ws', tokenData.wsUrl);
     localStorage.setItem('gd_room', tokenData.roomCode);
@@ -157,7 +157,6 @@ joinBtn.onclick = async () => {
 
     statusEl.innerHTML = '<span style="color:#5ee7ff">Success! Redirecting to discussion room...</span>';
 
-    // Redirect to room page
     setTimeout(() => {
       window.location.href = 'gd-room.html';
     }, 1200);

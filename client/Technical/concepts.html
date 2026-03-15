@@ -425,9 +425,14 @@
       }
 
       async function handleAIStep(prompt) {
+        // Automatically detects if you are testing locally or using the live Render site
+        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0')
+          ? "http://localhost:5000" 
+          : "https://careersync-backend-yo5x.onrender.com";
+
         try {
           const res = await fetch(
-            "http://localhost:5000/api/technical/analyze-concept",
+            `${BACKEND_URL}/api/analyze-concept`, // Updated modular path
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -449,7 +454,6 @@
           micStatus.innerText = "Check Server Connection";
         }
       }
-
       function startConcept(subject) {
         currentSubject = subject;
         document.getElementById("selector").style.display = "none";

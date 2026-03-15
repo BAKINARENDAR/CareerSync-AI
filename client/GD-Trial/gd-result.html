@@ -83,8 +83,7 @@
     </div>
 
     <script>
-        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "https://careersync-backend-yo5x.onrender.com";
-        
+      const BACKEND_URL = "https://careersync-backend-yo5x.onrender.com";
         async function fetchResults() {
             const transcript = localStorage.getItem("gd_final_transcript") || "Participant did not speak.";
             const participantName = localStorage.getItem("gd_name") || "Candidate";

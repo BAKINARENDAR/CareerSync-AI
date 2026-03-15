@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareerSync AI | GD Results</title>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
         body { background: #191b2a; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
@@ -29,37 +29,17 @@
         .topic { color: #898a9e; font-size: 14px; margin-bottom: 30px; font-style: italic; }
 
         .score-circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 6px solid #5ee7ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 30px;
+            width: 150px; height: 150px; border-radius: 50%; border: 6px solid #5ee7ff;
+            display: flex; justify-content: center; align-items: center; margin: 0 auto 30px;
             box-shadow: 0 0 20px rgba(94, 231, 255, 0.4), inset 0 0 20px rgba(94, 231, 255, 0.2);
-            font-size: 40px;
-            font-weight: 800;
-            color: #5ee7ff;
+            font-size: 40px; font-weight: 800; color: #5ee7ff;
         }
 
         .feedback-box { background: rgba(25, 27, 42, 0.6); padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
         .feedback-title { color: #5ee7ff; font-weight: 700; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
         .feedback-text { font-size: 15px; line-height: 1.5; color: #e2e2e2; }
 
-        .home-btn {
-            background: linear-gradient(90deg, #5ee7ff, #7bb7ff);
-            color: #191b2a;
-            padding: 15px 30px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-            transition: 0.3s;
-        }
+        .home-btn { background: linear-gradient(90deg, #5ee7ff, #7bb7ff); color: #191b2a; padding: 15px 30px; border-radius: 12px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 20px; width: 100%; transition: 0.3s; }
         .home-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(94,231,255,0.4); }
 
         #loading { display: flex; flex-direction: column; align-items: center; gap: 15px; margin: 50px 0; color: #5ee7ff; }
@@ -74,13 +54,12 @@
     <div class="result-container" id="content-area">
         <div id="loading">
             <div class="spinner"></div>
-            <h3>AI is analyzing your performance...</h3>
+            <h3 id="loadText">AI is analyzing your performance...</h3>
         </div>
 
         <div id="results" style="display: none;">
             <h2>Performance Report</h2>
             <div class="topic" id="resTopic">Topic: ---</div>
-
             <div class="score-circle" id="resScore">--/10</div>
 
             <div class="feedback-box">
@@ -104,10 +83,10 @@
     </div>
 
     <script>
-        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "[https://careersync-backend-yo5x.onrender.com](https://careersync-backend-yo5x.onrender.com)";
+        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "https://careersync-backend-yo5x.onrender.com";
         
         async function fetchResults() {
-            const transcript = localStorage.getItem("gd_final_transcript") || "";
+            const transcript = localStorage.getItem("gd_final_transcript") || "Participant did not speak.";
             const participantName = localStorage.getItem("gd_name") || "Candidate";
             const topic = localStorage.getItem("gd_topic") || "General Discussion";
 
@@ -120,7 +99,15 @@
                     body: JSON.stringify({ transcript, participantName, topic })
                 });
 
-                const data = await res.json();
+                // Safely handle text first in case it's an HTML error page
+                const textData = await res.text();
+                let data;
+                
+                try {
+                    data = JSON.parse(textData);
+                } catch(e) {
+                    throw new Error("Server did not return valid JSON. Check Render logs for Groq API limits.");
+                }
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('results').style.display = 'block';
@@ -132,7 +119,11 @@
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('loading').innerHTML = `<h3 style="color:#ef4743">Failed to analyze data.</h3><p>Ensure backend is running.</p>`;
+                document.getElementById('loading').innerHTML = `
+                    <h3 style="color:#ef4743">Failed to analyze data.</h3>
+                    <p style="color:#898a9e; font-size:14px; margin-top:10px;">${err.message}</p>
+                    <button class="home-btn" style="margin-top:20px;" onclick="window.location.href='../index.html'">Return Home</button>
+                `;
             }
         }
 

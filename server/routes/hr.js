@@ -15,7 +15,6 @@ router.post('/analyze', async (req, res) => {
 
     const responseText = text.trim();
 
-    // ✅ Updated prompt to include company/job/jobDescription context
     const prompt = `You are an experienced HR interviewer evaluating a candidate's spoken answer for a specific company and role.
 
 Company: "${company || 'Unknown Company'}"

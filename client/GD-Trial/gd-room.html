@@ -84,9 +84,10 @@
 
     <div id="audio-container" style="display:none;"></div>
 
-    <script>
+<script>
         const BACKEND_URL = "https://careersync-backend-yo5x.onrender.com";
-const socket = io(BACKEND_URL);
+        const socket = io(BACKEND_URL);
+        
         const roomCode = new URLSearchParams(window.location.search).get('room') || localStorage.getItem('gd_room');
         const isHost = (new URLSearchParams(window.location.search).get('host') === 'true') || (localStorage.getItem('gd_is_host') === 'true');
         
@@ -108,7 +109,10 @@ const socket = io(BACKEND_URL);
         let recognition;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = true; recognition.interimResults = false; recognition.lang = "en-IN";
+            recognition.continuous = true; 
+            recognition.interimResults = false; 
+            recognition.lang = "en-IN";
+            
             recognition.onresult = (event) => {
                 if(!isSessionActive || currentSpeaker !== pName) return; 
                 const text = event.results[event.results.length - 1][0].transcript.trim();
@@ -142,7 +146,6 @@ const socket = io(BACKEND_URL);
                 localRoom.on(LivekitClient.RoomEvent.ParticipantDisconnected, updateParticipants);
                 localRoom.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, handleSpeakers);
                 
-                // CRITICAL FIX: Attach audio tracks so you can hear others
                 localRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
                     if (track.kind === 'audio') {
                         const audioElement = track.attach();
@@ -182,24 +185,22 @@ const socket = io(BACKEND_URL);
             
             if (!isSessionActive) return;
 
-            // Clean classes
             micBtn.classList.remove('mic-free', 'mic-mine');
 
             if (currentSpeaker === pName) {
-                // I HAVE THE MIC (Red)
+                // I HAVE THE MIC
                 micBtn.disabled = false;
                 micBtn.classList.add('mic-mine');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
                 localRoom.localParticipant.setMicrophoneEnabled(true);
-                if (recognition) { try { recognition.start(); } catch(e) {} }
             } else if (currentSpeaker !== null) {
-                // SOMEONE ELSE HAS IT (Grey/Disabled)
+                // SOMEONE ELSE HAS IT
                 micBtn.disabled = true;
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
                 localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             } else {
-                // MIC IS FREE (Blue/Available)
+                // MIC IS FREE
                 micBtn.disabled = false;
                 micBtn.classList.add('mic-free');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
@@ -214,9 +215,12 @@ const socket = io(BACKEND_URL);
             if (currentSpeaker === pName) {
                 // Release the mic
                 socket.emit("release-mic", { roomCode });
+                if (recognition) recognition.stop();
             } else if (currentSpeaker === null) {
                 // Claim the mic
                 socket.emit("claim-mic", { roomCode, name: pName });
+                // CRITICAL FIX: Start transcription exactly on physical click to bypass browser security
+                if (recognition) { try { recognition.start(); } catch(e) {} }
             }
         };
 
@@ -225,7 +229,6 @@ const socket = io(BACKEND_URL);
             isSessionActive = true;
             document.getElementById('hostStartBtn').style.display = 'none';
             
-            // If mic is free, make it available to grab
             if (currentSpeaker === null) {
                 const micBtn = document.getElementById('toggleMic');
                 micBtn.disabled = false;
@@ -243,11 +246,9 @@ const socket = io(BACKEND_URL);
         document.getElementById('hostStartBtn').onclick = () => { socket.emit("start-gd", roomCode); };
         socket.on("gd-started", () => { if(!isSessionActive) startSession(); });
 
-        // END DISCUSSION -> Redirects immediately
+        // END DISCUSSION
         document.getElementById('leaveRoom').onclick = () => {
-            // Drop mic if holding it before leaving
             if (currentSpeaker === pName) socket.emit("release-mic", { roomCode });
-            
             if (localRoom) localRoom.disconnect();
             if (recognition) recognition.stop();
             localStorage.setItem("gd_final_transcript", fullTranscriptRecord);

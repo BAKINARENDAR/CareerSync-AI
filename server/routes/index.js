@@ -1,12 +1,11 @@
 // routes/index.js
 const hrRouter = require('./hr');
 const technicalRouter = require('./technical');
-const gdRouter = require('./gd'); // Import the GD file
+const gdRouter = require('./gd');
 
 module.exports = (app, rooms) => {
   app.use('/api', hrRouter);
-  app.use('/api/technical', technicalRouter);
+  app.use('/api', technicalRouter); 
   
-  // Pass the rooms object to the GD router
   app.use('/api/gd', gdRouter(rooms)); 
 };

@@ -104,24 +104,38 @@
         let fullTranscriptRecord = ""; 
         let currentSpeaker = null;
 
-        // --- SPEECH RECOGNITION ---
+        // --- BULLETPROOF SPEECH RECOGNITION ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = true; 
+            // CRITICAL FIX: Setting continuous to false forces the browser to print text FAST
+            recognition.continuous = false; 
             recognition.interimResults = false; 
             recognition.lang = "en-IN";
             
             recognition.onresult = (event) => {
                 if(!isSessionActive || currentSpeaker !== pName) return; 
-                const text = event.results[event.results.length - 1][0].transcript.trim();
+                const text = event.results[0][0].transcript.trim();
                 if (text) {
                     displayTranscript(pName, text);
                     socket.emit("gd-message", { roomCode, name: pName, text });
                 }
             };
-            recognition.onend = () => { if (isSessionActive && currentSpeaker === pName) { try { recognition.start(); } catch(e) {} } };
+            
+            // Auto-restart loop to keep listening after fast-printing
+            recognition.onend = () => { 
+                if (isSessionActive && currentSpeaker === pName) { 
+                    try { recognition.start(); } catch(e) {} 
+                } 
+            };
+            
+            // Crash recovery for mobile browsers
+            recognition.onerror = () => {
+                if (isSessionActive && currentSpeaker === pName) {
+                    setTimeout(() => { try { recognition.start(); } catch(e) {} }, 300);
+                }
+            };
         }
 
         function displayTranscript(name, text) {
@@ -146,7 +160,7 @@
                 localRoom.on(LivekitClient.RoomEvent.ParticipantDisconnected, updateParticipants);
                 localRoom.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, handleSpeakers);
                 
-                localRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+                localRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
                     if (track.kind === 'audio') {
                         const audioElement = track.attach();
                         document.getElementById('audio-container').appendChild(audioElement);
@@ -192,7 +206,12 @@
                 micBtn.disabled = false;
                 micBtn.classList.add('mic-mine');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-                localRoom.localParticipant.setMicrophoneEnabled(true);
+                
+                // CRITICAL FIX: Ensure WebRTC claims mic FIRST, then start transcript engine to prevent mobile crash
+                localRoom.localParticipant.setMicrophoneEnabled(true).then(() => {
+                    if (recognition) { try { recognition.start(); } catch(e) {} }
+                });
+                
             } else if (currentSpeaker !== null) {
                 // SOMEONE ELSE HAS IT
                 micBtn.disabled = true;
@@ -213,14 +232,10 @@
             if (!isSessionActive) return;
             
             if (currentSpeaker === pName) {
-                // Release the mic
                 socket.emit("release-mic", { roomCode });
                 if (recognition) recognition.stop();
             } else if (currentSpeaker === null) {
-                // Claim the mic
                 socket.emit("claim-mic", { roomCode, name: pName });
-                // CRITICAL FIX: Start transcription exactly on physical click to bypass browser security
-                if (recognition) { try { recognition.start(); } catch(e) {} }
             }
         };
 

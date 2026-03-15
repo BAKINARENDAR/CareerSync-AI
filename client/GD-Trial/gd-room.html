@@ -83,7 +83,6 @@
     </div>
 
     <div id="audio-container" style="display:none;"></div>
-
 <script>
         const BACKEND_URL = "https://careersync-backend-yo5x.onrender.com";
         const socket = io(BACKEND_URL);
@@ -109,8 +108,7 @@
         let recognition;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            // CRITICAL FIX: Setting continuous to false forces the browser to print text FAST
-            recognition.continuous = false; 
+            recognition.continuous = false; // Forces fast printing
             recognition.interimResults = false; 
             recognition.lang = "en-IN";
             
@@ -123,18 +121,10 @@
                 }
             };
             
-            // Auto-restart loop to keep listening after fast-printing
             recognition.onend = () => { 
                 if (isSessionActive && currentSpeaker === pName) { 
                     try { recognition.start(); } catch(e) {} 
                 } 
-            };
-            
-            // Crash recovery for mobile browsers
-            recognition.onerror = () => {
-                if (isSessionActive && currentSpeaker === pName) {
-                    setTimeout(() => { try { recognition.start(); } catch(e) {} }, 300);
-                }
             };
         }
 
@@ -151,7 +141,7 @@
             if (data.name !== pName) displayTranscript(data.name, data.text);
         });
 
-        // --- LIVEKIT SETUP & AUDIO ROUTING ---
+        // --- LIVEKIT SETUP ---
         async function initRoom() {
             try {
                 localRoom = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
@@ -207,23 +197,27 @@
                 micBtn.classList.add('mic-mine');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
                 
-                // CRITICAL FIX: Ensure WebRTC claims mic FIRST, then start transcript engine to prevent mobile crash
-                localRoom.localParticipant.setMicrophoneEnabled(true).then(() => {
-                    if (recognition) { try { recognition.start(); } catch(e) {} }
-                });
+                // CRITICAL FIX: SEQUENCE THE HARDWARE LOCKS
+                // 1. Start the Text Recognizer FIRST
+                if (recognition) { try { recognition.start(); } catch(e) {} }
+                
+                // 2. Wait 400ms, THEN open the Voice Call. This stops Android from crashing.
+                setTimeout(() => {
+                    if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(true);
+                }, 400);
                 
             } else if (currentSpeaker !== null) {
                 // SOMEONE ELSE HAS IT
                 micBtn.disabled = true;
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                localRoom.localParticipant.setMicrophoneEnabled(false);
+                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             } else {
                 // MIC IS FREE
                 micBtn.disabled = false;
                 micBtn.classList.add('mic-free');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                localRoom.localParticipant.setMicrophoneEnabled(false);
+                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             }
         });
@@ -234,6 +228,7 @@
             if (currentSpeaker === pName) {
                 socket.emit("release-mic", { roomCode });
                 if (recognition) recognition.stop();
+                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
             } else if (currentSpeaker === null) {
                 socket.emit("claim-mic", { roomCode, name: pName });
             }

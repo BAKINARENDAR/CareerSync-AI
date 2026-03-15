@@ -6,6 +6,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
 
+// Endpoint for Coding Interview Logic (Used by coding.html)
 router.post('/analyze-thought', async (req, res) => {
   const { message, history = [], studentName } = req.body;
 
@@ -14,12 +15,12 @@ router.post('/analyze-thought', async (req, res) => {
       messages: [
         {
           role: "system",
-          content: `You are a Senior Technical Interviewer.
-STRICT RULES:
-1. NEVER explain the coding solution yourself.
-2. YOUR ROLE is ONLY to present the challenge and judge ${studentName}'s logic.
-3. Ask about Time and Space complexity (O notation) based on their answer.
-4. Keep responses strictly under 3 sentences.`
+          content: `You are a Senior Technical Interviewer. 
+          STRICT RULES:
+          1. NEVER explain the coding solution yourself.
+          2. YOUR ROLE is ONLY to present the challenge and judge ${studentName}'s logic.
+          3. Ask about Time and Space complexity (O notation) based on their answer.
+          4. Keep responses strictly under 3 sentences.`
         },
         ...history,
         { role: "user", content: message }
@@ -31,11 +32,12 @@ STRICT RULES:
     res.json({ feedback: completion.choices[0].message.content });
 
   } catch (err) {
-    console.error(err);
+    console.error("Technical Thought Error:", err);
     res.status(500).json({ feedback: "I'm sorry, can you repeat that?" });
   }
 });
 
+// Endpoint for Technical Concepts (Used by concepts.html)
 router.post('/analyze-concept', async (req, res) => {
   const { message, history = [], studentName, subject } = req.body;
 
@@ -45,11 +47,11 @@ router.post('/analyze-concept', async (req, res) => {
         {
           role: "system",
           content: `You are a Senior Technical Interviewer.
-STRICT RULES:
-1. NEVER define concepts or explain how ${subject} works yourself.
-2. YOUR ROLE is strictly to ask ${studentName} technical questions.
-3. Start with basics, then go deeper.
-4. Keep responses strictly under 3 sentences.`
+          STRICT RULES:
+          1. NEVER define concepts or explain how ${subject} works yourself.
+          2. YOUR ROLE is strictly to ask ${studentName} technical questions.
+          3. Start with basics, then go deeper.
+          4. Keep responses strictly under 3 sentences.`
         },
         ...history,
         { role: "user", content: message }
@@ -61,7 +63,7 @@ STRICT RULES:
     res.json({ feedback: completion.choices[0].message.content });
 
   } catch (err) {
-    console.error(err);
+    console.error("Technical Concept Error:", err);
     res.status(500).json({ feedback: "I encountered an error. Please repeat." });
   }
 });

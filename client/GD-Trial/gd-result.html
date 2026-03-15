@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerSync AI | GD Results</title>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
+        body { background: #191b2a; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        header { position: absolute; top: 20px; left: 20px; cursor: pointer; }
+        .logo { font-size: 24px; font-weight: 600; }
+        .grad { background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .result-container {
+            margin-top: 80px;
+            background: rgba(38, 53, 86, 0.4);
+            border: 1px solid rgba(94, 231, 255, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h2 { font-size: 28px; margin-bottom: 5px; }
+        .topic { color: #898a9e; font-size: 14px; margin-bottom: 30px; font-style: italic; }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 6px solid #5ee7ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 20px rgba(94, 231, 255, 0.4), inset 0 0 20px rgba(94, 231, 255, 0.2);
+            font-size: 40px;
+            font-weight: 800;
+            color: #5ee7ff;
+        }
+
+        .feedback-box { background: rgba(25, 27, 42, 0.6); padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; }
+        .feedback-title { color: #5ee7ff; font-weight: 700; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .feedback-text { font-size: 15px; line-height: 1.5; color: #e2e2e2; }
+
+        .home-btn {
+            background: linear-gradient(90deg, #5ee7ff, #7bb7ff);
+            color: #191b2a;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .home-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(94,231,255,0.4); }
+
+        #loading { display: flex; flex-direction: column; align-items: center; gap: 15px; margin: 50px 0; color: #5ee7ff; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #5ee7ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header onclick="window.location.href='../index.html'"><div class="logo"><span class="grad">C</span>areerSync <span class="grad">A</span>I</div></header>
+
+    <div class="result-container" id="content-area">
+        <div id="loading">
+            <div class="spinner"></div>
+            <h3>AI is analyzing your performance...</h3>
+        </div>
+
+        <div id="results" style="display: none;">
+            <h2>Performance Report</h2>
+            <div class="topic" id="resTopic">Topic: ---</div>
+
+            <div class="score-circle" id="resScore">--/10</div>
+
+            <div class="feedback-box">
+                <div class="feedback-title">Overall Feedback</div>
+                <div class="feedback-text" id="resFeedback">Loading...</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="feedback-box">
+                    <div class="feedback-title" style="color: #4ade80;">Strengths</div>
+                    <div class="feedback-text" id="resStr">Loading...</div>
+                </div>
+                <div class="feedback-box">
+                    <div class="feedback-title" style="color: #ef4743;">To Improve</div>
+                    <div class="feedback-text" id="resImp">Loading...</div>
+                </div>
+            </div>
+
+            <button class="home-btn" onclick="window.location.href='../index.html'">Return to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "[https://careersync-backend-yo5x.onrender.com](https://careersync-backend-yo5x.onrender.com)";
+        
+        async function fetchResults() {
+            const transcript = localStorage.getItem("gd_final_transcript") || "";
+            const participantName = localStorage.getItem("gd_name") || "Candidate";
+            const topic = localStorage.getItem("gd_topic") || "General Discussion";
+
+            document.getElementById('resTopic').innerText = `Topic: ${topic}`;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/gd/analyze-gd`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transcript, participantName, topic })
+                });
+
+                const data = await res.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+
+                document.getElementById('resScore').innerText = data.score || "N/A";
+                document.getElementById('resFeedback').innerText = data.feedback || "No feedback available.";
+                document.getElementById('resStr').innerText = data.strengths || "-";
+                document.getElementById('resImp').innerText = data.improvements || "-";
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerHTML = `<h3 style="color:#ef4743">Failed to analyze data.</h3><p>Ensure backend is running.</p>`;
+            }
+        }
+
+        fetchResults();
+    </script>
+</body>
+</html>

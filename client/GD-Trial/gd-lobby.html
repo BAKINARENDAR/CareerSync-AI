@@ -3,63 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CareerSync AI - Group Discussion Lobby</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>CareerSync AI - GD Lobby</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
-    body {
-      min-height: 100vh;
-      background-color: #191b2a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 20px;
-    }
-    .grad { 
-      background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    header { 
-      position: absolute; top:20px; left:30px; cursor: pointer; 
-    }
-    .logo { font-size:26px; font-weight:600; letter-spacing: 0.5px; }
-    .container { 
-      width: 100%; max-width: 480px; text-align:center; 
-    }
-    .title { font-size:32px; font-weight:600; margin-bottom:8px; }
-    .subtitle { color:#898a9e; font-size:17px; margin-bottom:30px; }
-    .voice-circle {
-      width:220px; height:220px; border-radius:50%;
-      border:7px solid #ffffff;
-      box-shadow: 0 0 15px #ffffff, 0 0 30px #5ee7ff, inset 0 0 20px #5ee7ff;
-      display:flex; align-items:center; justify-content:center;
-      margin:30px auto; position:relative;
-    }
-    .voice-circle::after {
-      content:""; position:absolute; inset:0; border-radius:50%;
-      background: radial-gradient(circle, rgba(94,231,255,0.15) 0%, transparent 70%);
-    }
-    .mic-icon { font-size:80px; color:#5ee7ff; filter: drop-shadow(0 0 10px #5ee7ff); }
-    input, button {
-      width:100%; padding:14px 16px; margin:12px 0;
-      border-radius:12px; border:1px solid rgba(94,231,255,0.4);
-      background:#263556; color:white; font-size:16px;
-    }
-    input::placeholder { color:#898a9e; }
-    button {
-      background: linear-gradient(90deg, #5ee7ff, #7bb7ff);
-      border:none; color:#191b2a; font-weight:600; cursor:pointer;
-      transition: all 0.2s;
-    }
-    button:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(94,231,255,0.4); }
-    #status { margin:20px 0; min-height:60px; font-size:15px; line-height:1.5; color:#ffcc00; }
-    .error { color:#ff4d4d; }
+    body { background-color: #191b2a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; padding: 20px; }
+    .grad { background: linear-gradient(90deg, #5ee7ff, #7bb7ff, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    header { position: absolute; top:20px; left:30px; cursor: pointer; }
+    .logo { font-size:26px; font-weight:600; }
+    
+    .container { background: rgba(38, 53, 86, 0.4); border: 1px solid rgba(94, 231, 255, 0.3); border-radius: 16px; padding: 40px; width: 100%; max-width: 480px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .title { font-size:28px; font-weight:700; margin-bottom:10px; }
+    
+    .input-box { width:100%; padding:14px; margin:10px 0; border-radius:12px; border:1px solid rgba(94,231,255,0.4); background:#1b233f; color:white; font-size:16px; outline: none; transition: 0.3s; text-align: center; }
+    .input-box:focus { border-color: #5ee7ff; box-shadow: 0 0 10px rgba(94,231,255,0.2); }
+
+    .btn { width:100%; padding:14px; margin-top:15px; border-radius:12px; border:none; background: linear-gradient(90deg, #5ee7ff, #7bb7ff); color:#191b2a; font-weight:700; cursor:pointer; font-size: 16px; transition: 0.3s; }
+    .btn:hover { box-shadow: 0 0 20px rgba(94,231,255,0.4); transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    #roomDisplay { display: none; margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px dashed #5ee7ff; }
+    .room-code-text { font-size: 32px; font-weight: 800; letter-spacing: 4px; color: #5ee7ff; margin: 10px 0; }
+    #status { margin-top:15px; font-size:14px; color:#5ee7ff; min-height: 20px; }
   </style>
 </head>
 <body>
@@ -68,105 +34,99 @@
   <div class="logo"><span class="grad">C</span>areer<span class="grad">S</span>ync <span class="grad">A</span>I</div>
 </header>
 
-<div class="container">
-  <h1 class="title grad">Group Discussion Lobby</h1>
-  <p class="subtitle">Join or create a real-time voice GD</p>
-
-  <div class="voice-circle">
-    <i class="fa-solid fa-microphone mic-icon"></i>
-  </div>
-
-  <input id="username" placeholder="Your name (e.g. Baki)" required autocomplete="off" />
-  <input id="roomCode" placeholder="Room code (leave blank to create new)" autocomplete="off" />
-  <button id="joinBtn">Join / Create Room</button>
-
+<div class="container" id="step1">
+  <h1 class="title grad">Group Discussion</h1>
+  <p style="color:#898a9e; margin-bottom: 25px;">Enter your name to join or create a session</p>
+  
+  <input id="username" class="input-box" placeholder="Your Name" autocomplete="off" />
+  <input id="roomCode" class="input-box" placeholder="Room Code (Leave blank to create)" autocomplete="off" style="text-transform: uppercase;" />
+  
+  <button id="joinBtn" class="btn">Proceed</button>
   <div id="status"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
+<div class="container" id="step2" style="display: none;">
+    <h1 class="title grad">Room Created!</h1>
+    <p style="color:#898a9e;">Share this code with your group</p>
+    <div id="roomDisplay">
+        <div class="room-code-text" id="finalCodeDisplay">------</div>
+    </div>
+    <button id="enterRoomBtn" class="btn" style="margin-top: 25px;">Enter Discussion Room</button>
+</div>
+
 <script>
-// Pointing to LOCALHOST so it uses the fixes we just made
-const BACKEND_URL = "http://localhost:5000";  
+const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "https://careersync-backend-yo5x.onrender.com";
 
 const joinBtn = document.getElementById('joinBtn');
 const statusEl = document.getElementById('status');
+let generatedRoomCode = "";
+let isHostUser = false;
+let userName = "";
 
 joinBtn.onclick = async () => {
-  const name = document.getElementById('username').value.trim();
-  let code = document.getElementById('roomCode').value.trim();
+  userName = document.getElementById('username').value.trim();
+  let codeInput = document.getElementById('roomCode').value.trim().toUpperCase();
 
-  if (!name) {
-    statusEl.innerHTML = '<span class="error">Please enter your name</span>';
-    return;
-  }
-
-  statusEl.textContent = 'Connecting to server...';
+  if (!userName) return statusEl.innerHTML = '<span style="color:#ff4d4d">Please enter your name.</span>';
+  
+  joinBtn.disabled = true;
+  statusEl.textContent = 'Processing...';
 
   try {
-    let roomCode = code;
-    let topic = "Default GD Topic";
-
-    if (!code) {
-      const createRes = await fetch(`${BACKEND_URL}/api/gd/create-room`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}) 
-      });
-
-      if (!createRes.ok) {
-        const errData = await createRes.json();
-        throw new Error(errData.message || `Server error ${createRes.status}`);
-      }
-
+    if (!codeInput) {
+      statusEl.textContent = 'Generating AI Topic and creating room...';
+      const createRes = await fetch(`${BACKEND_URL}/api/gd/create-room`, { method: 'POST' });
       const createData = await createRes.json();
-      if (!createData.success) throw new Error(createData.message || 'Room creation failed');
+      if (!createData.success) throw new Error('Failed to create room');
+      
+      generatedRoomCode = createData.roomCode;
+      isHostUser = true;
 
-      roomCode = createData.roomCode;
-      topic = createData.topic;
-
-      alert(`New room created!\nCode: ${roomCode}\nShare this with friends!`);
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('step2').style.display = 'block';
+      document.getElementById('roomDisplay').style.display = 'block';
+      document.getElementById('finalCodeDisplay').innerText = generatedRoomCode;
+      
+    } else {
+      generatedRoomCode = codeInput;
+      isHostUser = false;
+      await authenticateAndJoin();
     }
-
-    statusEl.textContent = 'Getting access token...';
-
-    const tokenRes = await fetch(`${BACKEND_URL}/api/gd/get-livekit-token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        roomCode: roomCode,
-        participantName: name
-      })
-    });
-
-    if (!tokenRes.ok) {
-      const errData = await tokenRes.json();
-      throw new Error(errData.message || `Token request failed ${tokenRes.status}`);
-    }
-
-    const tokenData = await tokenRes.json();
-    if (!tokenData.success) throw new Error(tokenData.message || 'Access denied');
-
-    // Nuke old cache explicitly before setting new ones just in case
-    localStorage.clear();
-
-    localStorage.setItem('gd_token', tokenData.token);
-    localStorage.setItem('gd_ws', tokenData.wsUrl);
-    localStorage.setItem('gd_room', tokenData.roomCode);
-    localStorage.setItem('gd_name', name);
-    localStorage.setItem('gd_topic', tokenData.topic || topic);
-
-    statusEl.innerHTML = '<span style="color:#5ee7ff">Success! Redirecting to discussion room...</span>';
-
-    setTimeout(() => {
-      window.location.href = 'gd-room.html';
-    }, 1200);
-
   } catch (err) {
-    console.error("GD Lobby Error:", err);
-    statusEl.innerHTML = `<span class="error">Error: ${err.message}</span><br>
-      <small style="color:#aaa">Check console (F12) • Make sure backend URL is correct • Check Render logs</small>`;
+    joinBtn.disabled = false;
+    statusEl.innerHTML = `<span style="color:#ff4d4d">Error: ${err.message}</span>`;
   }
 };
+
+document.getElementById('enterRoomBtn').onclick = () => authenticateAndJoin();
+
+async function authenticateAndJoin() {
+    const btn = document.getElementById('enterRoomBtn');
+    btn.disabled = true;
+    btn.innerText = "Connecting...";
+    
+    try {
+        const tokenRes = await fetch(`${BACKEND_URL}/api/gd/get-livekit-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomCode: generatedRoomCode, participantName: userName })
+        });
+        const tokenData = await tokenRes.json();
+        if (!tokenData.success) throw new Error('Invalid Room Code or Server Error');
+
+        localStorage.setItem('gd_token', tokenData.token);
+        localStorage.setItem('gd_ws', tokenData.wsUrl);
+        localStorage.setItem('gd_room', generatedRoomCode);
+        localStorage.setItem('gd_name', userName);
+        localStorage.setItem('gd_topic', tokenData.topic);
+
+        window.location.href = `gd-room.html?room=${generatedRoomCode}&host=${isHostUser}`;
+    } catch (err) {
+        btn.disabled = false;
+        btn.innerText = "Enter Discussion Room";
+        alert("Failed to join: " + err.message);
+    }
+}
 </script>
 </body>
 </html>

@@ -76,7 +76,12 @@
             </div>
         </div>
     </div>
-
+    <div id="mobileInputContainer" style="display:none; position:fixed; bottom:90px; width:90%; max-width:700px; background:rgba(38, 53, 86, 0.95); padding:10px; border-radius:12px; border:1px solid #5ee7ff; z-index:99; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+        <form id="mobileForm" style="display:flex; gap:10px;">
+            <input type="text" id="mobileTextInput" placeholder="Mobile: Type or use Keyboard Mic..." autocomplete="off" style="flex:1; padding:12px; border-radius:8px; border:1px solid rgba(94,231,255,0.3); outline:none; background:#191b2a; color:white; font-size: 14px;">
+            <button type="submit" style="background:#5ee7ff; color:#191b2a; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer;">Send</button>
+        </form>
+    </div>
     <div class="bottom-dock">
         <button class="dock-btn" id="toggleMic" disabled><i class="fa-solid fa-microphone-slash"></i></button>
         <button class="dock-btn end-btn" id="leaveRoom"><i class="fa-solid fa-phone-slash"></i></button>
@@ -104,12 +109,14 @@
         let fullTranscriptRecord = ""; 
         let currentSpeaker = null;
 
-        // --- BULLETPROOF SPEECH RECOGNITION ---
+        // Device Detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // --- BULLETPROOF SPEECH RECOGNITION (DESKTOP ONLY) ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
-        if (SpeechRecognition) {
+        if (SpeechRecognition && !isMobile) {
             recognition = new SpeechRecognition();
-            // CRITICAL FIX: Setting continuous to false forces the browser to print text FAST
             recognition.continuous = false; 
             recognition.interimResults = false; 
             recognition.lang = "en-IN";
@@ -123,18 +130,10 @@
                 }
             };
             
-            // Auto-restart loop to keep listening after fast-printing
             recognition.onend = () => { 
                 if (isSessionActive && currentSpeaker === pName) { 
                     try { recognition.start(); } catch(e) {} 
                 } 
-            };
-            
-            // Crash recovery for mobile browsers
-            recognition.onerror = () => {
-                if (isSessionActive && currentSpeaker === pName) {
-                    setTimeout(() => { try { recognition.start(); } catch(e) {} }, 300);
-                }
             };
         }
 
@@ -148,15 +147,22 @@
         }
 
         socket.on("gd-new-message", (data) => {
-            if (!data?.name || !data?.text) return;
-            const incoming = String(data.name).trim().toLowerCase();
-            const mine    = String(pName).trim().toLowerCase();
-            if (incoming !== mine) {
-                displayTranscript(data.name, data.text);
-            }
+            if (data.name !== pName) displayTranscript(data.name, data.text);
         });
 
-        // --- LIVEKIT SETUP & AUDIO ROUTING ---
+        // --- MOBILE INPUT HANDLER ---
+        document.getElementById('mobileForm').onsubmit = (e) => {
+            e.preventDefault();
+            const inputEl = document.getElementById('mobileTextInput');
+            const text = inputEl.value.trim();
+            if (text && currentSpeaker === pName) {
+                displayTranscript(pName, text);
+                socket.emit("gd-message", { roomCode, name: pName, text });
+                inputEl.value = ''; // Clear after sending
+            }
+        };
+
+        // --- LIVEKIT SETUP ---
         async function initRoom() {
             try {
                 localRoom = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
@@ -201,6 +207,7 @@
         socket.on("mic-update", (data) => {
             currentSpeaker = data.currentSpeaker;
             const micBtn = document.getElementById('toggleMic');
+            const mobileInput = document.getElementById('mobileInputContainer');
             
             if (!isSessionActive) return;
 
@@ -212,23 +219,29 @@
                 micBtn.classList.add('mic-mine');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
                 
-                // CRITICAL FIX: Ensure WebRTC claims mic FIRST, then start transcript engine to prevent mobile crash
-                localRoom.localParticipant.setMicrophoneEnabled(true).then(() => {
-                    if (recognition) { try { recognition.start(); } catch(e) {} }
-                });
+                // Show mobile input if on phone
+                if (isMobile) mobileInput.style.display = 'block';
+                
+                if (!isMobile && recognition) { try { recognition.start(); } catch(e) {} }
+                
+                setTimeout(() => {
+                    if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(true);
+                }, 400);
                 
             } else if (currentSpeaker !== null) {
                 // SOMEONE ELSE HAS IT
                 micBtn.disabled = true;
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                localRoom.localParticipant.setMicrophoneEnabled(false);
+                mobileInput.style.display = 'none';
+                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             } else {
                 // MIC IS FREE
                 micBtn.disabled = false;
                 micBtn.classList.add('mic-free');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                localRoom.localParticipant.setMicrophoneEnabled(false);
+                mobileInput.style.display = 'none';
+                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             }
         });
@@ -239,6 +252,7 @@
             if (currentSpeaker === pName) {
                 socket.emit("release-mic", { roomCode });
                 if (recognition) recognition.stop();
+                if (localRoom) localRoom.localParticipant.setMicrophoneEnabled(false);
             } else if (currentSpeaker === null) {
                 socket.emit("claim-mic", { roomCode, name: pName });
             }

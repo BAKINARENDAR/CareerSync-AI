@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareerSync AI | Group Discussion</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)" />
+    <script src="[https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js](https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js)"></script>
+    <script src="[https://cdn.socket.io/4.7.2/socket.io.min.js](https://cdn.socket.io/4.7.2/socket.io.min.js)"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
         body { background: #191b2a; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
@@ -31,9 +31,7 @@
         #participantList, #transcriptBody { flex: 1; overflow-y: auto; }
         .participant-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
         
-        .status-tags { display: flex; gap: 8px; align-items: center; }
         .speaking-tag { color: #191b2a; font-weight: 700; font-size: 10px; display: none; background: #5ee7ff; padding: 3px 6px; border-radius: 4px; box-shadow: 0 0 8px #5ee7ff; }
-        .hand-tag { font-size: 16px; display: none; } /* Kept simple so it stays visible if in queue */
 
         .chat-msg { margin-bottom: 10px; font-size: 14px; line-height: 1.4; background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; border-left: 3px solid #5ee7ff;}
         .chat-name { color: #5ee7ff; font-weight: 700; margin-right: 5px; }
@@ -41,14 +39,10 @@
         .bottom-dock { position: fixed; bottom: 20px; background: rgba(38, 53, 86, 0.95); backdrop-filter: blur(10px); padding: 10px 25px; border-radius: 40px; display: flex; gap: 20px; align-items: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; }
         
         .dock-btn { width: 50px; height: 50px; border-radius: 50%; border: none; display: flex; justify-content: center; align-items: center; font-size: 20px; transition: 0.3s; opacity: 0.5; cursor: not-allowed; }
-        .dock-btn.active { opacity: 1; cursor: pointer; }
         
         /* Mic states */
-        .mute-btn { background: transparent; color: #5ee7ff; border: 2px solid #5ee7ff; }
-        .mute-btn.is-muted { background: #ef4743; color: white; border-color: #ef4743; }
-        
-        .hand-btn { background: transparent; color: #ffcc00; border: 2px solid #ffcc00; }
-        .hand-btn.active { opacity: 1; cursor: pointer; }
+        .mic-free { opacity: 1; cursor: pointer; background: transparent; color: #5ee7ff; border: 2px solid #5ee7ff; }
+        .mic-mine { opacity: 1; cursor: pointer; background: #ef4743; color: white; border: 2px solid #ef4743; }
         
         .end-btn { background: #ef4743; color: white; opacity: 1; cursor: pointer; }
 
@@ -84,15 +78,14 @@
     </div>
 
     <div class="bottom-dock">
-        <button class="dock-btn mute-btn is-muted" id="toggleMic" disabled><i class="fa-solid fa-microphone-slash"></i></button>
-        <button class="dock-btn hand-btn" id="raiseHandBtn" disabled><i class="fa-solid fa-hand"></i></button>
+        <button class="dock-btn" id="toggleMic" disabled><i class="fa-solid fa-microphone-slash"></i></button>
         <button class="dock-btn end-btn" id="leaveRoom"><i class="fa-solid fa-phone-slash"></i></button>
     </div>
 
     <div id="audio-container" style="display:none;"></div>
 
     <script>
-        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "https://careersync-backend-yo5x.onrender.com";
+        const BACKEND_URL = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? "http://localhost:5000" : "[https://careersync-backend-yo5x.onrender.com](https://careersync-backend-yo5x.onrender.com)";
         const socket = io(BACKEND_URL);
         
         const roomCode = new URLSearchParams(window.location.search).get('room') || localStorage.getItem('gd_room');
@@ -109,7 +102,7 @@
 
         let localRoom, isSessionActive = false, timerValue = 900; 
         let fullTranscriptRecord = ""; 
-        let currentSpeaker = null; // Controlled by Server Baton Logic
+        let currentSpeaker = null;
 
         // --- SPEECH RECOGNITION ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -118,7 +111,7 @@
             recognition = new SpeechRecognition();
             recognition.continuous = true; recognition.interimResults = false; recognition.lang = "en-IN";
             recognition.onresult = (event) => {
-                if(!isSessionActive || currentSpeaker !== pName) return; // Only process if you hold the baton
+                if(!isSessionActive || currentSpeaker !== pName) return; 
                 const text = event.results[event.results.length - 1][0].transcript.trim();
                 if (text) {
                     displayTranscript(pName, text);
@@ -141,7 +134,7 @@
             if (data.name !== pName) displayTranscript(data.name, data.text);
         });
 
-        // --- LIVEKIT AUDIO SYNC (CRITICAL FOR MULTI-DEVICE) ---
+        // --- LIVEKIT SETUP & AUDIO ROUTING ---
         async function initRoom() {
             try {
                 localRoom = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
@@ -150,8 +143,8 @@
                 localRoom.on(LivekitClient.RoomEvent.ParticipantDisconnected, updateParticipants);
                 localRoom.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, handleSpeakers);
                 
-                // CRITICAL FIX: Attach incoming audio tracks to DOM so you can hear them
-                localRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+                // CRITICAL FIX: Attach audio tracks so you can hear others
+                localRoom.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
                     if (track.kind === 'audio') {
                         const audioElement = track.attach();
                         document.getElementById('audio-container').appendChild(audioElement);
@@ -159,7 +152,7 @@
                 });
 
                 await localRoom.connect(wsUrl, token);
-                await localRoom.localParticipant.setMicrophoneEnabled(false); // Default off
+                await localRoom.localParticipant.setMicrophoneEnabled(false); 
                 
                 updateParticipants(); 
                 socket.emit("join-gd-room", { roomCode, participantName: pName });
@@ -168,13 +161,12 @@
 
         function updateParticipants() {
             const list = document.getElementById('participantList');
-            list.innerHTML = `<div class="participant-item"><span>${pName} (You)</span> <div class="status-tags"><span class="hand-tag" id="hand-local">✋</span><span class="speaking-tag" id="tag-local">SPEAKING</span></div></div>`;
+            list.innerHTML = `<div class="participant-item"><span>${pName} (You)</span> <span class="speaking-tag" id="tag-local">SPEAKING</span></div>`;
             localRoom.remoteParticipants.forEach(p => {
-                list.innerHTML += `<div class="participant-item"><span>${p.identity}</span> <div class="status-tags"><span class="hand-tag" id="hand-${p.identity}">✋</span><span class="speaking-tag" id="tag-${p.identity}">SPEAKING</span></div></div>`;
+                list.innerHTML += `<div class="participant-item"><span>${p.identity}</span> <span class="speaking-tag" id="tag-${p.identity}">SPEAKING</span></div>`;
             });
         }
 
-        // LiveKit real-time speaker visuals
         function handleSpeakers(speakers) {
             document.querySelectorAll('.speaking-tag').forEach(t => t.style.display = 'none');
             speakers.forEach(s => {
@@ -184,74 +176,48 @@
             });
         }
 
-        // --- THE MIC BATON & HAND RAISE SYSTEM ---
+        // --- STRICT MIC BATON LOGIC ---
         socket.on("mic-update", (data) => {
             currentSpeaker = data.currentSpeaker;
-            const queue = data.queue || [];
             const micBtn = document.getElementById('toggleMic');
             
-            // Sync Hand Icons
-            document.querySelectorAll('.hand-tag').forEach(t => t.style.display = 'none');
-            queue.forEach(nameInQueue => {
-                const isMe = nameInQueue === pName;
-                const tag = document.getElementById(isMe ? 'hand-local' : `hand-${nameInQueue}`);
-                if(tag) tag.style.display = 'inline-block';
-            });
-
-            // If session hasn't started, don't allow mic changes
             if (!isSessionActive) return;
 
+            // Clean classes
+            micBtn.classList.remove('mic-free', 'mic-mine');
+
             if (currentSpeaker === pName) {
-                // I HAVE THE MIC
+                // I HAVE THE MIC (Red)
                 micBtn.disabled = false;
-                micBtn.classList.remove('is-muted');
+                micBtn.classList.add('mic-mine');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
                 localRoom.localParticipant.setMicrophoneEnabled(true);
                 if (recognition) { try { recognition.start(); } catch(e) {} }
             } else if (currentSpeaker !== null) {
-                // SOMEONE ELSE HAS THE MIC
+                // SOMEONE ELSE HAS IT (Grey/Disabled)
                 micBtn.disabled = true;
-                micBtn.classList.add('is-muted');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
                 localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             } else {
-                // MIC IS FREE - ANYONE CAN GRAB IT
+                // MIC IS FREE (Blue/Available)
                 micBtn.disabled = false;
-                micBtn.classList.add('is-muted');
+                micBtn.classList.add('mic-free');
                 micBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
                 localRoom.localParticipant.setMicrophoneEnabled(false);
                 if (recognition) recognition.stop();
             }
         });
 
-        socket.on("hand-queue-update", (data) => {
-            const queue = data.queue || [];
-            document.querySelectorAll('.hand-tag').forEach(t => t.style.display = 'none');
-            queue.forEach(nameInQueue => {
-                const isMe = nameInQueue === pName;
-                const tag = document.getElementById(isMe ? 'hand-local' : `hand-${nameInQueue}`);
-                if(tag) tag.style.display = 'inline-block';
-            });
-        });
-
-        // Click Mic Button -> Sends Request to Server
         document.getElementById('toggleMic').onclick = () => {
             if (!isSessionActive) return;
             
             if (currentSpeaker === pName) {
-                // I have it, I'm dropping it
+                // Release the mic
                 socket.emit("release-mic", { roomCode });
             } else if (currentSpeaker === null) {
-                // It's free, I want it
+                // Claim the mic
                 socket.emit("claim-mic", { roomCode, name: pName });
-            }
-        };
-
-        // Raise Hand
-        document.getElementById('raiseHandBtn').onclick = () => {
-            if (isSessionActive && currentSpeaker !== pName) {
-                socket.emit("raise-hand", { roomCode, name: pName });
             }
         };
 
@@ -259,12 +225,12 @@
         function startSession() {
             isSessionActive = true;
             document.getElementById('hostStartBtn').style.display = 'none';
-            document.getElementById('raiseHandBtn').disabled = false;
-            document.getElementById('raiseHandBtn').classList.add('active');
             
-            // Force an update to unlock the mic if it's free
+            // If mic is free, make it available to grab
             if (currentSpeaker === null) {
-                document.getElementById('toggleMic').disabled = false;
+                const micBtn = document.getElementById('toggleMic');
+                micBtn.disabled = false;
+                micBtn.classList.add('mic-free');
             }
 
             setInterval(() => {
@@ -278,8 +244,11 @@
         document.getElementById('hostStartBtn').onclick = () => { socket.emit("start-gd", roomCode); };
         socket.on("gd-started", () => { if(!isSessionActive) startSession(); });
 
-        // END DISCUSSION
+        // END DISCUSSION -> Redirects immediately
         document.getElementById('leaveRoom').onclick = () => {
+            // Drop mic if holding it before leaving
+            if (currentSpeaker === pName) socket.emit("release-mic", { roomCode });
+            
             if (localRoom) localRoom.disconnect();
             if (recognition) recognition.stop();
             localStorage.setItem("gd_final_transcript", fullTranscriptRecord);
